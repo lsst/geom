@@ -187,6 +187,9 @@ class IntervalTests:
             for rhs in self.points:
                 with self.subTest(lhs=lhs, rhs=rhs):
                     self.assertEqual(lhs.contains(rhs), lhs.min <= rhs and lhs.max >= rhs)
+            array = np.array(self.points)
+            np.testing.assert_array_equal(lhs.contains(array),
+                                          np.logical_and(lhs.min <= array, lhs.max >= array))
         for lhs in self.intervals.empty:
             for rhs in self.intervals.nonempty:
                 with self.subTest(lhs=lhs, rhs=rhs):

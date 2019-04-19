@@ -212,8 +212,11 @@ public:
     /// Return true if the box contains no points.
     bool isEmpty() const noexcept { return _dimensions.getX() == 0 && _dimensions.getY() == 0; }
 
+    //@{
     /// Return true if the box contains the point.
     bool contains(Point2I const& point) const noexcept;
+    bool contains(Element x, Element y) const noexcept { return contains(Point2I(x, y)); }
+    //@}
 
     /**
      *  Return true if all points contained by other are also contained by this.
@@ -467,8 +470,11 @@ public:
     /// Return true if the box contains no points.
     bool isEmpty() const noexcept { return _minimum.getX() != _minimum.getX(); }
 
+    //@{
     /// Return true if the box contains the point.
     bool contains(Point2D const& point) const noexcept;
+    bool contains(Element x, Element y) const noexcept { return contains(Point2D(x, y)); }
+    //@}
 
     /**
      *  Return true if all points contained by other are also contained by this.
