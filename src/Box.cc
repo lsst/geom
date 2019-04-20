@@ -115,29 +115,27 @@ ndarray::View<boost::fusion::vector2<ndarray::index::Range, ndarray::index::Rang
 }
 
 bool Box2I::contains(Point2I const& point) const noexcept {
-    return all(point.ge(this->getMin())) && all(point.le(this->getMax()));
+    return getX().contains(point.getX()) && getY().contains(point.getY());
 }
 
 bool Box2I::contains(Box2I const& other) const noexcept {
-    return other.isEmpty() ||
-           (all(other.getMin().ge(this->getMin())) && all(other.getMax().le(this->getMax())));
+    return getX().contains(other.getX()) && getY().contains(other.getY());
 }
 
 bool Box2I::overlaps(Box2I const& other) const noexcept {
-    return !(other.isEmpty() || this->isEmpty() || any(other.getMax().lt(this->getMin())) ||
-             any(other.getMin().gt(this->getMax())));
+    return !isDisjointFrom(other);
+}
+
+bool Box2I::isDisjointFrom(Box2I const& other) const noexcept {
+    return getX().isDisjointFrom(other.getX()) || getY().isDisjointFrom(other.getY());
 }
 
 void Box2I::grow(Extent2I const& buffer) {
-    if (isEmpty()) return;  // should we throw an exception here instead of a no-op?
-    _minimum -= buffer;
-    _dimensions += buffer * 2;
-    if (any(_dimensions.le(0))) *this = Box2I();
+    *this = dilatedBy(buffer);
 }
 
 void Box2I::shift(Extent2I const& offset) {
-    if (isEmpty()) return;  // should we throw an exception here instead of a no-op?
-    _minimum += offset;
+    *this = shiftedBy(offset);
 }
 
 void Box2I::flipLR(int xextent) {
@@ -215,6 +213,41 @@ void Box2I::clip(Box2I const& other) noexcept {
     _dimensions = Extent2I(1) + maximum - _minimum;
 }
 
+Box2I Box2I::dilatedBy(Extent const& buffer) const {
+    return Box2I(getX().dilatedBy(buffer.getX()),
+                 getY().dilatedBy(buffer.getY()));
+}
+
+Box2I Box2I::shiftedBy(Extent const& offset) const {
+    return Box2I(getX().shiftedBy(offset.getX()),
+                 getY().shiftedBy(offset.getY()));
+}
+
+Box2I Box2I::reflectedAboutX(Element x) const {
+    return Box2I(getX().reflectedAbout(x),
+                 getY());
+}
+
+Box2I Box2I::reflectedAboutY(Element y) const {
+    return Box2I(getX(),
+                 getY().reflectedAbout(y));
+}
+
+Box2I Box2I::expandedTo(Point const & other) const {
+    return Box2I(getX().expandedTo(other.getX()),
+                 getY().expandedTo(other.getY()));
+}
+
+Box2I Box2I::expandedTo(Box2I const & other) const {
+    return Box2I(getX().expandedTo(other.getX()),
+                 getY().expandedTo(other.getY()));
+}
+
+Box2I Box2I::clippedTo(Box2I const& other) const noexcept {
+    return Box2I(getX().clippedTo(other.getX()),
+                 getY().clippedTo(other.getY()));
+}
+
 bool Box2I::operator==(Box2I const& other) const noexcept {
     return other._minimum == this->_minimum && other._dimensions == this->_dimensions;
 }
@@ -290,17 +323,24 @@ Box2D Box2D::makeCenteredBox(Point2D const& center, Box2D::Extent const& size) n
 }
 
 bool Box2D::contains(Point2D const& point) const noexcept {
+    // Can't delegate to IntervalD here because IntervalID is closed while
+    // Box2D is half-open.
     return all(point.ge(this->getMin())) && all(point.lt(this->getMax()));
 }
 
 bool Box2D::contains(Box2D const& other) const noexcept {
-    return other.isEmpty() ||
-           (all(other.getMin().ge(this->getMin())) && all(other.getMax().le(this->getMax())));
+    return getX().contains(other.getX()) && getY().contains(other.getY());
 }
 
 bool Box2D::overlaps(Box2D const& other) const noexcept {
+    // Can't delegate to IntervalD here because IntervalID is closed while
+    // Box2D is half-open.
     return !(other.isEmpty() || this->isEmpty() || any(other.getMax().le(this->getMin())) ||
              any(other.getMin().ge(this->getMax())));
+}
+
+bool Box2D::isDisjointFrom(Box2D const& other) const noexcept {
+    return !overlaps(other);
 }
 
 void Box2D::grow(Extent2D const& buffer) {
@@ -396,6 +436,34 @@ void Box2D::clip(Box2D const& other) noexcept {
         *this = Box2D();
         return;
     }
+}
+
+Box2D Box2D::dilatedBy(Extent const & buffer) const {
+    return Box2D(getX().dilatedBy(buffer.getX()),
+                 getY().dilatedBy(buffer.getY()));
+}
+
+Box2D Box2D::shiftedBy(Extent const & offset) const {
+    return Box2D(getX().shiftedBy(offset.getX()),
+                 getY().shiftedBy(offset.getY()));
+}
+
+Box2D Box2D::expandedTo(Point const & other) const {
+    // Can't delegate to IntervalD here because IntervalID is closed while
+    // Box2D is still half-open.
+    Box2D copy(*this);
+    copy.include(other);
+    return copy;
+}
+
+Box2D Box2D::expandedTo(Box2D const & other) const noexcept {
+    return Box2D(getX().expandedTo(other.getX()),
+                 getY().expandedTo(other.getY()));
+}
+
+Box2D Box2D::clippedTo(Box2D const & other) const noexcept {
+    return Box2D(getX().clippedTo(other.getX()),
+                 getY().clippedTo(other.getY()));
 }
 
 bool Box2D::operator==(Box2D const& other) const noexcept {
