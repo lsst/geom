@@ -66,32 +66,29 @@ Box2I::Box2I(Point2I const& corner, Extent2I const& dimensions, bool invert)
     }
 }
 
-Box2I::Box2I(Box2D const& other, EdgeHandlingEnum edgeHandling) : _minimum(), _dimensions() {
-    if (other.isEmpty()) {
-        *this = Box2I();
-        return;
-    }
-    if (!std::isfinite(other.getMinX()) || !std::isfinite(other.getMinY()) ||
-        !std::isfinite(other.getMaxX()) || !std::isfinite(other.getMaxY())) {
-        throw LSST_EXCEPT(pex::exceptions::InvalidParameterError, "Cannot convert non-finite Box2D to Box2I");
-    }
-    Point2D fpMin(other.getMin() + Extent2D(0.5));
-    Point2D fpMax(other.getMax() - Extent2D(0.5));
-    switch (edgeHandling) {
-        case EXPAND:
-            for (int n = 0; n < 2; ++n) {
-                _minimum[n] = static_cast<int>(std::floor(fpMin[n]));
-                _dimensions[n] = static_cast<int>(std::ceil(fpMax[n])) + 1 - _minimum[n];
-            }
-            break;
-        case SHRINK:
-            for (int n = 0; n < 2; ++n) {
-                _minimum[n] = static_cast<int>(std::ceil(fpMin[n]));
-                _dimensions[n] = static_cast<int>(std::floor(fpMax[n])) + 1 - _minimum[n];
-            }
-            break;
+namespace {
+
+// Translate a Box2I enum value to the corresponding IntervalI one.  Box2I
+// can't just use the IntervalI one because Box2I's is for historical reasons
+// an old-style enum and IntervalI's is a class enum, and we don't want to
+// break any Box-dependent code right now.
+IntervalI::EdgeHandlingEnum translateEdgeHandling(Box2I::EdgeHandlingEnum input) {
+    switch (input) {
+    case Box2I::EXPAND:
+        return IntervalI::EdgeHandlingEnum::EXPAND;
+    case Box2I::SHRINK:
+        return IntervalI::EdgeHandlingEnum::SHRINK;
+    default:
+        throw pex::exceptions::LogicError("Invalid enum value.");
     }
 }
+
+}
+
+Box2I::Box2I(Box2D const& other, EdgeHandlingEnum edgeHandling) :
+    Box2I(IntervalI(other.getX(), translateEdgeHandling(edgeHandling)),
+          IntervalI(other.getY(), translateEdgeHandling(edgeHandling)))
+{}
 
 Point2D const Box2I::getCenter() const noexcept {
     return Box2D(*this).getCenter();

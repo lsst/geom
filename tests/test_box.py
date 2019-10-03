@@ -159,7 +159,7 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
                 self.assertTrue(fpBox.contains(fpBoxSmall))
                 self.assertTrue(intBoxBig.contains(intBoxSmall))
                 self.assertTrue(geom.Box2D(intBoxBig))
-                self.assertEqual(geom.Box2I(fpBoxBig, geom.Box2I.EXPAND), intBoxBig)
+                self.assertEqual(geom.Box2I(fpBoxBig, geom.Box2I.SHRINK), intBoxBig)
                 self.assertEqual(geom.Box2I(fpBoxSmall, geom.Box2I.SHRINK), intBoxSmall)
         self.assertTrue(geom.Box2I(geom.Box2D()).isEmpty())
         self.assertRaises(lsst.pex.exceptions.InvalidParameterError, geom.Box2I,
