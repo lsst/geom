@@ -140,8 +140,7 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
 
     def testConversion(self):
         for n in range(10):
-            xmin, xmax, ymin, ymax = np.random.uniform(
-                low=-10, high=10, size=4)
+            xmin, xmax, ymin, ymax = np.random.uniform(low=-10, high=10, size=4)
             if xmin > xmax:
                 xmin, xmax = xmax, xmin
             if ymin > ymax:
@@ -150,19 +149,18 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
             fpMax = geom.Point2D(xmax, ymax)
             if any((fpMax-fpMin).lt(3)):
                 continue  # avoid empty boxes
-            fpBox = geom.Box2D(fpMin, fpMax)
-            intBoxBig = geom.Box2I(fpBox, geom.Box2I.EXPAND)
-            fpBoxBig = geom.Box2D(intBoxBig)
-            intBoxSmall = geom.Box2I(fpBox, geom.Box2I.SHRINK)
-            fpBoxSmall = geom.Box2D(intBoxSmall)
-            self.assertTrue(fpBoxBig.contains(fpBox))
-            self.assertTrue(fpBox.contains(fpBoxSmall))
-            self.assertTrue(intBoxBig.contains(intBoxSmall))
-            self.assertTrue(geom.Box2D(intBoxBig))
-            self.assertEqual(geom.Box2I(
-                fpBoxBig, geom.Box2I.EXPAND), intBoxBig)
-            self.assertEqual(geom.Box2I(
-                fpBoxSmall, geom.Box2I.SHRINK), intBoxSmall)
+            with self.subTest(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax):
+                fpBox = geom.Box2D(fpMin, fpMax)
+                intBoxBig = geom.Box2I(fpBox, geom.Box2I.EXPAND)
+                fpBoxBig = geom.Box2D(intBoxBig)
+                intBoxSmall = geom.Box2I(fpBox, geom.Box2I.SHRINK)
+                fpBoxSmall = geom.Box2D(intBoxSmall)
+                self.assertTrue(fpBoxBig.contains(fpBox))
+                self.assertTrue(fpBox.contains(fpBoxSmall))
+                self.assertTrue(intBoxBig.contains(intBoxSmall))
+                self.assertTrue(geom.Box2D(intBoxBig))
+                self.assertEqual(geom.Box2I(fpBoxBig, geom.Box2I.EXPAND), intBoxBig)
+                self.assertEqual(geom.Box2I(fpBoxSmall, geom.Box2I.SHRINK), intBoxSmall)
         self.assertTrue(geom.Box2I(geom.Box2D()).isEmpty())
         self.assertRaises(lsst.pex.exceptions.InvalidParameterError, geom.Box2I,
                           geom.Box2D(geom.Point2D(), geom.Point2D(float("inf"), float("inf"))))
