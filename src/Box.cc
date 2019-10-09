@@ -325,7 +325,7 @@ bool Box2D::contains(Point2D const& point) const noexcept {
     return all(point.ge(this->getMin())) && all(point.lt(this->getMax()));
 }
 
-bool Box2D::contains(Box2D const& other) const noexcept {
+bool Box2D::contains(Box2D const& other) const {
     return getX().contains(other.getX()) && getY().contains(other.getY());
 }
 
@@ -463,12 +463,12 @@ Box2D Box2D::expandedTo(Point const & other) const {
     return copy;
 }
 
-Box2D Box2D::expandedTo(Box2D const & other) const noexcept {
+Box2D Box2D::expandedTo(Box2D const & other) const {
     return Box2D(getX().expandedTo(other.getX()),
                  getY().expandedTo(other.getY()));
 }
 
-Box2D Box2D::clippedTo(Box2D const & other) const noexcept {
+Box2D Box2D::clippedTo(Box2D const & other) const {
     return Box2D(getX().clippedTo(other.getX()),
                  getY().clippedTo(other.getY()));
 }

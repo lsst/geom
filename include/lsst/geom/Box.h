@@ -567,7 +567,7 @@ public:
      *
      *  An empty box is contained by every other box, including other empty boxes.
      */
-    bool contains(Box2D const& other) const noexcept;
+    bool contains(Box2D const& other) const;
 
     //@{
     /**
@@ -722,7 +722,7 @@ public:
      *
      *  Expanding an empty box with a second box is equivalent to assignment.
      */
-    Box2D expandedTo(Box2D const & other) const noexcept;
+    Box2D expandedTo(Box2D const & other) const;
 
     /**
      * Shrink a box to ensure that it is contained by other (returning a new
@@ -731,7 +731,7 @@ public:
      * In particular, if `other` and `this` do not overlap, the new box will
      * be empty.
      */
-    Box2D clippedTo(Box2D const & other) const noexcept;
+    Box2D clippedTo(Box2D const & other) const;
 
     /**
      *  Compare two boxes for equality.
