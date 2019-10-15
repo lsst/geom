@@ -159,6 +159,18 @@ public:
      */
     Element getSize() const noexcept { return _size; }
 
+    /**
+     *  Return slice to extract the interval's region from an ndarray::Array.
+     *
+     *  For example:
+     *
+     *      auto array = ndarray::copy(ndarray::arange(5);
+     *      auto interval = IntervalI::fromMinMax(2, 4);
+     *      auto subarray = array[interval.getSlice()];
+     *
+     */
+    ndarray::View<boost::fusion::vector1<ndarray::index::Range> > getSlice() const;
+
     /// Return true if the interval contains no points.
     bool isEmpty() const noexcept { return _size == 0; }
 

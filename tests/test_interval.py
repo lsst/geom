@@ -267,6 +267,14 @@ class IntervalITestCase(unittest.TestCase, IntervalTests):
         # tries to make them consistent, nothing (not even tests) should depend
         # on that.
 
+    def testExtensions(self):
+        s = list(range(10))
+        i = IntervalI(min=3, max=8)
+        self.assertEqual(s[i.slice()], list(i.range()))
+        self.assertEqual(len(i.range()), i.size)
+        np.testing.assert_array_equal(np.array(list(i.range()), dtype=np.int32), i.arange())
+        np.testing.assert_array_equal(np.array(list(i.range()), dtype=np.int64), i.arange(dtype=np.int64))
+
     def testOverflow(self):
         # Small enough to fit in int32 without any problem at all.
         small = 1 << 16

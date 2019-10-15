@@ -37,6 +37,16 @@
 namespace lsst {
 namespace geom {
 
+BOOST_AUTO_TEST_CASE(IntervalISlice) {
+    auto array = ndarray::copy(ndarray::arange(5));
+    auto interval = IntervalI::fromMinMax(2, 4);
+    auto subarray = array[interval.getSlice()];
+    BOOST_TEST(subarray.getShape() == ndarray::makeVector(3));
+    BOOST_TEST(subarray[0] == 2);
+    BOOST_TEST(subarray[1] == 3);
+    BOOST_TEST(subarray[2] == 4);
+}
+
 BOOST_AUTO_TEST_CASE(IntervalIHash) {
     utils::assertValidHash<IntervalI>();
     utils::assertHashesEqual(IntervalI::fromMinMax(2, 5), IntervalI::fromMinSize(2, 4));

@@ -84,6 +84,10 @@ IntervalI IntervalI::fromCenterSize(double center, Element size) {
     return IntervalI(static_cast<BigElement>(min), size);
 }
 
+ndarray::View<boost::fusion::vector1<ndarray::index::Range>> IntervalI::getSlice() const {
+    return ndarray::view(getBegin(), getEnd());
+}
+
 bool IntervalI::contains(Element point) const noexcept {
     // The case where this->isEmpty() is handled implicitly by the invariant
     // that empty intervals have max < min.
