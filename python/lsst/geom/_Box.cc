@@ -122,6 +122,8 @@ void wrapBox(utils::python::WrapperCollection & wrappers) {
             cls.def("erodedBy", py::overload_cast<int>(&Box2I::erodedBy, py::const_));
             cls.def("erodedBy", py::overload_cast<Extent2I const &>(&Box2I::erodedBy, py::const_));
             cls.def("shiftedBy", &Box2I::shiftedBy);
+            cls.def("reflectedAboutX", &Box2I::reflectedAboutX);
+            cls.def("reflectedAboutY", &Box2I::reflectedAboutY);
             cls.def("expandedTo", py::overload_cast<Point2I const &>(&Box2I::expandedTo, py::const_));
             cls.def("expandedTo", py::overload_cast<Box2I const &>(&Box2I::expandedTo, py::const_));
             cls.def("clippedTo", &Box2I::clippedTo);
@@ -226,6 +228,8 @@ void wrapBox(utils::python::WrapperCollection & wrappers) {
             cls.def("erodedBy", py::overload_cast<double>(&Box2D::erodedBy, py::const_));
             cls.def("erodedBy", py::overload_cast<Extent2D const &>(&Box2D::erodedBy, py::const_));
             cls.def("shiftedBy", &Box2D::shiftedBy);
+            cls.def("reflectedAboutX", &Box2D::reflectedAboutX);
+            cls.def("reflectedAboutY", &Box2D::reflectedAboutY);
             cls.def("expandedTo", py::overload_cast<Point2D const &>(&Box2D::expandedTo, py::const_));
             cls.def("expandedTo", py::overload_cast<Box2D const &>(&Box2D::expandedTo, py::const_));
             cls.def("clippedTo", &Box2D::clippedTo);

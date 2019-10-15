@@ -448,6 +448,16 @@ Box2D Box2D::shiftedBy(Extent const & offset) const {
                  getY().shiftedBy(offset.getY()));
 }
 
+Box2D Box2D::reflectedAboutX(Element x) const {
+    return Box2D(getX().reflectedAbout(x),
+                 getY());
+}
+
+Box2D Box2D::reflectedAboutY(Element y) const {
+    return Box2D(getX(),
+                 getY().reflectedAbout(y));
+}
+
 Box2D Box2D::expandedTo(Point const & other) const {
     // Can't delegate to IntervalD here because IntervalID is closed while
     // Box2D is still half-open.

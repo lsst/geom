@@ -321,6 +321,20 @@ public:
      */
     Box2I shiftedBy(Extent const & offset) const;
 
+    /**
+     * Reflect the box about a vertical line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     */
+    Box2I reflectedAboutX(Element x) const;
+
+    /**
+     * Reflect the box about a horizontal line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     */
+    Box2I reflectedAboutY(Element y) const;
+
     //@{
     /**
      * Expand the box to ensure that `contains(other)` is true (returning a
@@ -669,6 +683,26 @@ public:
      *      `offset` is not finite.
      */
     Box2D shiftedBy(Extent const & offset) const;
+
+    /**
+     * Reflect the box about a vertical line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `x` is not finite.
+     */
+    Box2D reflectedAboutX(Element x) const;
+
+    /**
+     * Reflect the box about a horizontal line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `y` is not finite.
+     */
+    Box2D reflectedAboutY(Element y) const;
 
     /**
      *  Expand a box to ensure that `contains(other)` is true (returning a new
