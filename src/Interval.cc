@@ -154,6 +154,15 @@ IntervalI IntervalI::shiftedBy(Element offset) const {
     return IntervalI(static_cast<Element>(min), getSize());
 }
 
+IntervalI IntervalI::reflectedAbout(Element point) const {
+    if (isEmpty()) {
+        return IntervalI();
+    }
+    BigElement max = 2 * static_cast<BigElement>(point) - getMin();
+    BigElement min = 2 * static_cast<BigElement>(point) - getMax();
+    return _fromMinMaxChecked(min, max);
+}
+
 IntervalI IntervalI::expandedTo(Element point) const {
     if (isEmpty()) {
         return IntervalI(point, 1);
@@ -286,6 +295,17 @@ IntervalD IntervalD::shiftedBy(Element offset) const {
     }
     if (!isEmpty()) {
         return fromMinMax(_min + offset, _max + offset);
+    } else {
+        return IntervalD();
+    }
+}
+
+IntervalD IntervalD::reflectedAbout(Element point) const {
+    if (!std::isfinite(point)) {
+        throw LSST_EXCEPT(pex::exceptions::InvalidParameterError, "Cannot reflect about a non-finite point.");
+    }
+    if (!isEmpty()) {
+        return fromMinMax(2 * point - _max, 2 * point - _min);
     } else {
         return IntervalD();
     }

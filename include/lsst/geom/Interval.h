@@ -322,6 +322,13 @@ public:
      */
     IntervalI shiftedBy(Element offset) const;
 
+    /**
+     * Reflect an interval about a point (returning a new object).
+     *
+     * Empty intervals remain empty when reflected.
+     */
+    IntervalI reflectedAbout(Element point) const;
+
     //@{
     /**
      * Expand an interval to ensure that `contains(other)` is true (returning a
@@ -651,6 +658,18 @@ public:
      *      `offset` is not finite.
      */
     IntervalD shiftedBy(Element offset) const;
+
+    /**
+     *  Reflect an interval about a point (returning a new object).
+     *
+     *  Empty intervals remain empty when reflected.  If an interval with an
+     *  infinite bound is reflected, the opposite bound will become infinite
+     *  with the opposite sign.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `point` is not finite.
+     */
+    IntervalD reflectedAbout(Element point) const;
 
     /**
      *  Expand an interval to ensure that `contains(other)` is true.

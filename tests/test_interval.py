@@ -303,6 +303,23 @@ class IntervalTests:
                     with self.assertRaises(InvalidParameterError):
                         original.erodedBy(buffer)
 
+    def testReflectedAbout(self):
+        for original in self.intervals.nonempty:
+            for point in self.points:
+                reflected = original.reflectedAbout(point)
+                with self.subTest(original=original, point=point, reflected=reflected):
+                    self.assertEqual(point - original.min, -(point - reflected.max))
+                    self.assertEqual(point - original.max, -(point - reflected.min))
+        for original in self.intervals.empty:
+            for point in self.points:
+                with self.subTest(original=original, point=point):
+                    self.checkEmptyIntervalInvariants(original.reflectedAbout(point))
+        for original in self.intervals.all:
+            for point in self.nonfinitePoints:
+                with self.subTest(original=original, point=point):
+                    with self.assertRaises(InvalidParameterError):
+                        original.reflectedAbout(point)
+
 
 class IntervalDTestCase(unittest.TestCase, IntervalTests):
     IntervalClass = IntervalD

@@ -88,6 +88,7 @@ void declareCommonIntervalInterface(PyClass &cls) {
     cls.def("dilatedBy", &T::dilatedBy);
     cls.def("erodedBy", &T::erodedBy);
     cls.def("shiftedBy", &T::shiftedBy);
+    cls.def("reflectedAbout", &T::reflectedAbout);
     cls.def("expandedTo", py::overload_cast<Element>(&T::expandedTo, py::const_));
     cls.def("expandedTo", py::overload_cast<T const &>(&T::expandedTo, py::const_));
     cls.def("clippedTo", &T::clippedTo);
