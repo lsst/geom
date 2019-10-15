@@ -39,6 +39,13 @@ void declareCommonIntervalInterface(PyClass &cls) {
     using T = typename PyClass::type;
     using Element = typename T::Element;
     cls.def(py::init<>());
+    // It's not clear why py::overload cast doesn't work for the next two
+    // declarations - maybe the templated context matters?
+    cls.def_static("fromSpannedPoints", [](ndarray::Array<Element const, 1> const &elements) {
+        return T::fromSpannedPoints(elements);
+    });
+    cls.def_static("fromSpannedPoints",
+                   [](std::vector<Element> const &elements) { return T::fromSpannedPoints(elements); });
     cls.def(py::init([](py::kwargs kw) -> T {
         if (kw.size() == 2) {
             if (kw.contains("min")) {
@@ -78,6 +85,12 @@ void declareCommonIntervalInterface(PyClass &cls) {
     cls.def("overlaps", &T::overlaps);
     cls.def("intersects", &T::intersects);
     cls.def("isDisjointFrom", &T::isDisjointFrom);
+    cls.def("dilatedBy", &T::dilatedBy);
+    cls.def("erodedBy", &T::erodedBy);
+    cls.def("shiftedBy", &T::shiftedBy);
+    cls.def("expandedTo", py::overload_cast<Element>(&T::expandedTo, py::const_));
+    cls.def("expandedTo", py::overload_cast<T const &>(&T::expandedTo, py::const_));
+    cls.def("clippedTo", &T::clippedTo);
     cls.def("__str__", &T::toString);
     utils::python::addOutputOp(cls, "__repr__");
     cls.def("__reduce__", [cls](IntervalD const &self) {

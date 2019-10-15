@@ -77,6 +77,47 @@ public:
     IntervalI() noexcept : _min(0), _size(0) {}
 
     /**
+     *  Construct an interval that contains all of the given points.
+     *
+     *  @param[in] first  Iterator to the beginning of a sequence of integers.
+     *  @param[in] last   Iterator to one-past-the-end of a sequence of
+     *                    integers.
+     *
+     *  An empty interval is returned if `first == last`.
+     *
+     *  @throws lsst::pex::exceptions::OverflowError Thrown if the resulting
+     *      interval would overflow.
+     */
+    template <typename Iter>
+    static IntervalI fromSpannedPoints(Iter first, Iter last) {
+        IntervalI result;
+        for (auto i = first; i != last; ++i) {
+            result = result.expandedTo(*i);
+        }
+        return result;
+    }
+
+    //@{
+    /**
+     *  Construct an interval that contains all of the given points.
+     *
+     *  @param[in] elements  Points (integer values) to include in the
+     *                       interval.
+     *
+     *  An empty interval is returned if the given container has no elements.
+     *
+     *  @throws lsst::pex::exceptions::OverflowError Thrown if the resulting
+     *      interval would overflow.
+     */
+    static IntervalI fromSpannedPoints(std::vector<Element> const& elements) {
+        return fromSpannedPoints(elements.begin(), elements.end());
+    }
+    static IntervalI fromSpannedPoints(ndarray::Array<Element const, 1> const& elements) {
+        return fromSpannedPoints(elements.begin(), elements.end());
+    }
+    //@}
+
+    /**
      *  Construct an interval from its lower and upper bounds.
      *
      *  If min > max, the resulting interval is empty.
@@ -248,6 +289,62 @@ public:
     bool isDisjointFrom(IntervalI const& other) const noexcept;
 
     /**
+     *  Increase the size of the interval by the given amount in both
+     *  directions (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to eroding by `-buffer`.
+     *
+     *  If the final size of the interval is less than or equal to zero the
+     *  new interval will be empty.
+     *
+     *  Empty intervals remain empty after dilation.
+     */
+    IntervalI dilatedBy(Element buffer) const;
+
+    /**
+     *  Decrease the size of the interval by the given amount in both
+     *  directions (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to dilating by `-buffer`.
+     *
+     *  If the final size of the interval is less than or equal to zero the
+     *  new interval will be empty.
+     *
+     *  Empty intervals remain empty after erosion.
+     */
+    IntervalI erodedBy(Element buffer) const { return dilatedBy(-buffer); }
+
+    /**
+     * Shift the position of the interval by the given offset (returning a new
+     * object).)
+     *
+     * Empty intervals remain empty when shifted.
+     */
+    IntervalI shiftedBy(Element offset) const;
+
+    //@{
+    /**
+     * Expand an interval to ensure that `contains(other)` is true (returning a
+     * new object).
+     *
+     * Expanding an empty interval with a single point yields an interval with
+     * size=1 at that point; expanding an empty interval with a second interval
+     * is equivalent to assignment.
+     */
+    IntervalI expandedTo(Element other) const;
+    IntervalI expandedTo(IntervalI const& other) const;
+    //@}
+
+    /**
+     * Shrink an interval to ensure that it is contained by other (returning a
+     * new)
+     *
+     * In particular, if `other` and this interval do not overlap, the returned
+     * interval will be empty.
+     */
+    IntervalI clippedTo(IntervalI const& other) const noexcept;
+
+    /**
      *  Compare two intervals for equality.
      *
      *  All empty intervals are equal.
@@ -312,6 +409,48 @@ public:
 
     /// Construct an empty interval.
     IntervalD() noexcept;
+
+    /**
+     *  Construct an interval that contains all of the given points.
+     *
+     *  @param[in] first  Iterator to the beginning of a sequence of
+     *                    floating-point values.
+     *  @param[in] last   Iterator to one-past-the-end of a sequence of
+     *                    floating-point values.
+     *
+     *  An empty interval is returned if `first == last`.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError Thrown if any
+     *      input point is non-finite.
+     */
+    template <typename Iter>
+    static IntervalD fromSpannedPoints(Iter first, Iter last) {
+        IntervalD result;
+        for (auto i = first; i != last; ++i) {
+            result = result.expandedTo(*i);
+        }
+        return result;
+    }
+
+    //@{
+    /**
+     *  Construct an interval that contains all of the given points.
+     *
+     *  @param[in] elements  Points (floating-point values) to include in the
+     *                       interval.
+     *
+     *  An empty interval is returned if the given container has no elements.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError Thrown if any
+     *      input point is non-finite.
+     */
+    static IntervalD fromSpannedPoints(std::vector<Element> const& elements) {
+        return fromSpannedPoints(elements.begin(), elements.end());
+    }
+    static IntervalD fromSpannedPoints(ndarray::Array<Element const, 1> const& elements) {
+        return fromSpannedPoints(elements.begin(), elements.end());
+    }
+    //@}
 
     /**
      *  Construct an interval from its lower and upper bounds.
@@ -466,6 +605,82 @@ public:
      *  Return true if there are no points in both `this` and `other`.
      */
     bool isDisjointFrom(IntervalD const& other) const noexcept;
+
+    /**
+     *  Increase the size of the interval by the given amount in both
+     *  directions (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to eroding by `-buffer`.
+     *
+     *  If the final size of the interval is less than zero, the new interval
+     *  will be empty.
+     *
+     *  Empty intervals remain empty after dilation.  Infinite bounds are
+     *  unaffected by dilation.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `buffer` is not finite.
+     */
+    IntervalD dilatedBy(Element buffer) const;
+
+    /**
+     *  Decrease the size of the interval by the given amount in both
+     *  directions (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to dilating by `-buffer`.
+     *
+     *  If the final size of the interval is less than zero, the new interval
+     *  will be empty.
+     *
+     *  Empty intervals remain empty after erosion.  Infinite bounds are
+     *  unaffected by erosion.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `buffer` is not finite.
+     */
+    IntervalD erodedBy(Element buffer) const { return dilatedBy(-buffer); }
+
+    /**
+     *  Shift the position of the interval by the given offset (returning a
+     *  new object).
+     *
+     *  Empty intervals remain empty when shifted.  Infinite bounds are
+     *  unaffected by shifting.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `offset` is not finite.
+     */
+    IntervalD shiftedBy(Element offset) const;
+
+    /**
+     *  Expand an interval to ensure that `contains(other)` is true.
+     *
+     *  Expanding an empty interval with a single point yields an interval
+     *  with `size == 0` at that point.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if `other`
+     *       is not finite.
+     */
+    IntervalD expandedTo(Element other) const;
+
+    /**
+     *  Expand an interval to ensure that `contains(other)` is true.
+     *
+     *  Expanding an empty interval with a second interval is equivalent to
+     *  assignment.
+     *
+     *  Expanding by an empty interval yields the original interval.
+     */
+    IntervalD expandedTo(IntervalD const& other) const noexcept;
+
+    /**
+     * Shrink an interval to ensure that it is contained by other (returning a
+     * new object).
+     *
+     * In particular, if `other` and this interval do not overlap the new
+     * interval will be empty.
+     */
+    IntervalD clippedTo(IntervalD const& other) const noexcept;
 
     /**
      *  Compare two intervals for equality.

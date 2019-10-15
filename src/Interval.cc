@@ -134,6 +134,53 @@ bool IntervalI::isDisjointFrom(IntervalI const& other) const noexcept {
     return getMin() > other.getMax() || getMax() < other.getMin();
 }
 
+IntervalI IntervalI::dilatedBy(Element buffer) const {
+    if (isEmpty()) {
+        return IntervalI();
+    }
+    BigElement min = static_cast<BigElement>(getMin()) - buffer;
+    BigElement max = static_cast<BigElement>(getMax()) + buffer;
+    return _fromMinMaxChecked(min, max);
+}
+
+IntervalI IntervalI::shiftedBy(Element offset) const {
+    if (isEmpty()) {
+        return IntervalI();
+    }
+    BigElement min = static_cast<BigElement>(getMin()) + offset;
+    BigElement max = static_cast<BigElement>(getMax()) + offset;
+    checkForOverflow(min, "minimum");
+    checkForOverflow(max, "maximum");
+    return IntervalI(static_cast<Element>(min), getSize());
+}
+
+IntervalI IntervalI::expandedTo(Element point) const {
+    if (isEmpty()) {
+        return IntervalI(point, 1);
+    }
+    return _fromMinMaxChecked(std::min(static_cast<BigElement>(point), static_cast<BigElement>(getMin())),
+                              std::max(static_cast<BigElement>(point), static_cast<BigElement>(getMax())));
+}
+
+IntervalI IntervalI::expandedTo(IntervalI const& other) const {
+    if (other.isEmpty()) {
+        return *this;
+    }
+    if (this->isEmpty()) {
+        return other;
+    }
+    return _fromMinMaxChecked(
+            std::min(static_cast<BigElement>(other.getMin()), static_cast<BigElement>(getMin())),
+            std::max(static_cast<BigElement>(other.getMax()), static_cast<BigElement>(getMax())));
+}
+
+IntervalI IntervalI::clippedTo(IntervalI const& other) const noexcept {
+    if (isEmpty() || other.isEmpty()) {
+        return IntervalI();
+    }
+    return fromMinMax(std::max(getMin(), other.getMin()), std::min(getMax(), other.getMax()));
+}
+
 bool IntervalI::operator==(IntervalI const& other) const noexcept {
     return other._min == this->_min && other._size == this->_size;
 }
@@ -223,6 +270,54 @@ bool IntervalD::isDisjointFrom(IntervalD const& other) const noexcept {
         return true;
     }
     return getMin() > other.getMax() || getMax() < other.getMin();
+}
+
+IntervalD IntervalD::dilatedBy(Element buffer) const {
+    if (!std::isfinite(buffer)) {
+        throw LSST_EXCEPT(pex::exceptions::InvalidParameterError,
+                          "Cannot dilate or erode with a non-finite buffer.");
+    }
+    return fromMinMax(_min - buffer, _max + buffer);
+}
+
+IntervalD IntervalD::shiftedBy(Element offset) const {
+    if (!std::isfinite(offset)) {
+        throw LSST_EXCEPT(pex::exceptions::InvalidParameterError, "Cannot shift with a non-finite offset.");
+    }
+    if (!isEmpty()) {
+        return fromMinMax(_min + offset, _max + offset);
+    } else {
+        return IntervalD();
+    }
+}
+
+IntervalD IntervalD::expandedTo(Element point) const {
+    if (!std::isfinite(point)) {
+        throw LSST_EXCEPT(pex::exceptions::InvalidParameterError, "Cannot expand to a non-finite point.");
+    }
+    if (isEmpty()) {
+        return fromMinMax(point, point);
+    } else {
+        return fromMinMax(std::min(point, _min), std::max(point, _max));
+    }
+}
+
+IntervalD IntervalD::expandedTo(IntervalD const& other) const noexcept {
+    if (other.isEmpty()) {
+        return *this;
+    } else if (this->isEmpty()) {
+        return other;
+    } else {
+        return fromMinMax(std::min(this->getMin(), other.getMin()), std::max(this->getMax(), other.getMax()));
+    }
+}
+
+IntervalD IntervalD::clippedTo(IntervalD const& other) const noexcept {
+    if (this->isEmpty() || other.isEmpty()) {
+        return IntervalD();
+    } else {
+        return fromMinMax(std::max(this->getMin(), other.getMin()), std::min(this->getMax(), other.getMax()));
+    }
 }
 
 bool IntervalD::operator==(IntervalD const& other) const noexcept {
