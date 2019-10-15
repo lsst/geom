@@ -51,6 +51,28 @@ class IntervalI final {
 public:
     using Element = int;
 
+    /**
+     *  Enum used to indicate how to handle conversions from floating-point to
+     *  integer intervals.
+     *
+     *  Note that the floating point bounds for some pixel `x` in an
+     *  integer interval are `[x - 0.5, x + 0.5]` (because the pixel has
+     *  unit size, and integer coordinates correspond to the centers of
+     *  pixels).  This means interval conversions involve more than just
+     *  rounding the bounds inward or outward.
+     */
+    enum class EdgeHandlingEnum {
+        /**
+         *  Include all pixels that overlap the floating-point interval at all.
+         */
+        EXPAND,
+        /**
+         *  Include only pixels that are wholly contained by the floating-point
+         *  interval.
+         */
+        SHRINK
+    };
+
     /// Construct an empty interval.
     IntervalI() noexcept : _min(0), _size(0) {}
 
@@ -110,6 +132,30 @@ public:
      *     is not finite and size is positive.
      */
     static IntervalI fromCenterSize(double center, Element size);
+
+    /**
+     *  Construct an integer interval from a floating-point interval.
+     *
+     *  Floating-point to integer interval conversion is based on the concept
+     *  that a pixel is not an infinitesimal point but rather a square of unit
+     *  size centered on integer-valued coordinates.  Converting a
+     *  floating-point interval to an integer interval thus requires a choice
+     *  on how to handle pixels which are only partially contained by the
+     *  input floating-point interval.
+     *
+     *  @param[in] other          A floating-point interval to convert.
+     *  @param[in] edgeHandling   If EXPAND, the integer interval will contain
+     *                            any pixels that overlap the floating-point
+     *                            interval.  If SHRINK, the integer interval
+     *                            will contain only pixels completely
+     *                            contained by the floating-point interval.
+     *
+     * @throws lsst::pex::exceptions::InvalidParameterError Thrown if `other`
+     *     is not finite.
+     * @throws lsst::pex::exceptions::LogicError Thrown if an invalid enum
+     *     value is passed.
+     */
+    explicit IntervalI(IntervalD const& other, EdgeHandlingEnum edgeHandling = EdgeHandlingEnum::EXPAND);
 
     /// Standard copy constructor.
     IntervalI(IntervalI const&) noexcept = default;
@@ -326,6 +372,17 @@ public:
      *      is NaN and the other is infinite.
      */
     static IntervalD fromCenterSize(double center, Element size);
+
+    /**
+     *  Construct a floating-point interval from an integer interval.
+     *
+     *  Integer to floating-point interval conversion is based on the concept
+     *  that a pixel is not an infinitesimal point but rather a square of unit
+     *  size centered on integer-valued coordinates.  While the output
+     *  floating-point interval thus has the same size as the input integer
+     *  interval, its minimum/maximum coordinates are 0.5 smaller/greater.
+     */
+    explicit IntervalD(IntervalI const& other) noexcept;
 
     /// Standard copy constructor.
     IntervalD(IntervalD const&) noexcept = default;

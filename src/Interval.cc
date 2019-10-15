@@ -84,6 +84,31 @@ IntervalI IntervalI::fromCenterSize(double center, Element size) {
     return IntervalI(static_cast<BigElement>(min), size);
 }
 
+IntervalI::IntervalI(IntervalD const& other, EdgeHandlingEnum edgeHandling) : _min(), _size() {
+    if (other.isEmpty()) {
+        *this = IntervalI();
+        return;
+    }
+    if (!std::isfinite(other.getMin()) || !std::isfinite(other.getMax())) {
+        throw LSST_EXCEPT(pex::exceptions::InvalidParameterError,
+                          "Cannot convert non-finite IntervalD to IntervalI");
+    }
+    BigElement min, max;
+    switch (edgeHandling) {
+        case EdgeHandlingEnum::EXPAND:
+            min = static_cast<BigElement>(std::ceil(other.getMin() - 0.5));
+            max = static_cast<BigElement>(std::floor(other.getMax() + 0.5));
+            break;
+        case EdgeHandlingEnum::SHRINK:
+            min = static_cast<BigElement>(std::ceil(other.getMin() + 0.5));
+            max = static_cast<BigElement>(std::floor(other.getMax() - 0.5));
+            break;
+        default:
+            throw pex::exceptions::LogicError("Invalid enum value.");
+    }
+    *this = _fromMinMaxChecked(min, max);
+}
+
 ndarray::View<boost::fusion::vector1<ndarray::index::Range>> IntervalI::getSlice() const {
     return ndarray::view(getBegin(), getEnd());
 }
@@ -168,6 +193,11 @@ IntervalD IntervalD::fromCenterSize(Element center, Element size) {
     }
     Element min = center - 0.5 * size;
     return lsst::geom::IntervalD::fromMinSize(min, size);
+}
+
+IntervalD::IntervalD(IntervalI const& other) noexcept
+        : _min(other.getMin() - 0.5), _max(other.getMax() + 0.5) {
+    if (other.isEmpty()) *this = IntervalD();
 }
 
 IntervalD::Element IntervalD::getSize() const noexcept { return isEmpty() ? 0.0 : (_max - _min); }

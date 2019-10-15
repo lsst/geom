@@ -275,6 +275,27 @@ class IntervalITestCase(unittest.TestCase, IntervalTests):
         np.testing.assert_array_equal(np.array(list(i.range()), dtype=np.int32), i.arange())
         np.testing.assert_array_equal(np.array(list(i.range()), dtype=np.int64), i.arange(dtype=np.int64))
 
+    def testConversions(self):
+        cases = [
+            (IntervalD(min=0.5, max=0.5), IntervalI.EdgeHandlingEnum.EXPAND, IntervalI(min=0, max=1)),
+            (IntervalD(min=0.5, max=0.5), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI()),
+            (IntervalD(min=0.3, max=0.8), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI()),
+            (IntervalD(min=0.3, max=1.8), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI(min=1, max=1)),
+            (IntervalD(min=0.3, max=1.3), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI()),
+            (IntervalD(min=0.0, max=0.0), IntervalI.EdgeHandlingEnum.EXPAND, IntervalI(min=0, max=0)),
+            (IntervalD(min=0.0, max=0.1), IntervalI.EdgeHandlingEnum.EXPAND, IntervalI(min=0, max=0)),
+            (IntervalD(min=0.9, max=1.0), IntervalI.EdgeHandlingEnum.EXPAND, IntervalI(min=1, max=1)),
+            (IntervalD(min=0.0, max=1.0), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI()),
+            (IntervalD(min=-0.1, max=1.1), IntervalI.EdgeHandlingEnum.EXPAND, IntervalI(min=0, max=1)),
+            (IntervalD(min=-0.1, max=1.1), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI()),
+        ]
+        for intervalD, edgeHandling, intervalI in cases:
+            with self.subTest(intervalD=intervalD, edgeHandling=edgeHandling, intervalI=intervalI):
+                self.assertFalse(intervalD.isEmpty())
+                self.assertEqual(IntervalI(intervalD, edgeHandling), intervalI)
+                if intervalI.isEmpty():
+                    self.checkEmptyIntervalInvariants(IntervalI(intervalD, edgeHandling))
+
     def testOverflow(self):
         # Small enough to fit in int32 without any problem at all.
         small = 1 << 16
