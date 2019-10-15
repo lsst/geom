@@ -19,37 +19,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "pybind11/pybind11.h"
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE IntervalCpp
 
-#include "lsst/utils/python.h"
+#include "boost/test/unit_test.hpp"
 
+#include "lsst/utils/tests.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+#include "lsst/geom/Interval.h"
+#include "ndarray/arange.h"
 
+/*
+ * Unit tests for C++-only functionality in IntervalI and IntervalD.
+ *
+ * See test_interval.py for remaining unit tests.
+ */
 namespace lsst {
 namespace geom {
 
-using utils::python::WrapperCollection;
+BOOST_AUTO_TEST_CASE(IntervalIHash) {
+    utils::assertValidHash<IntervalI>();
+    utils::assertHashesEqual(IntervalI::fromMinMax(2, 5), IntervalI::fromMinSize(2, 4));
+    utils::assertHashesEqual(IntervalI(), IntervalI::fromMinMax(1, -1));
+}
 
-void wrapAngle(WrapperCollection & wrappers);
-void wrapCoordinates(WrapperCollection & wrappers);
-void wrapSpherePoint(WrapperCollection & wrappers);
-void wrapInterval(WrapperCollection & wrappers);
-void wrapBox(WrapperCollection & wrappers);
-void wrapLinearTransform(WrapperCollection & wrappers);
-void wrapAffineTransform(WrapperCollection & wrappers);
-
-PYBIND11_MODULE(_geom, mod) {
-    WrapperCollection w(mod, "lsst.geom");
-    wrapAngle(w);
-    wrapCoordinates(w);
-    wrapSpherePoint(w);
-    wrapInterval(w);
-    wrapBox(w);
-    wrapLinearTransform(w);
-    wrapAffineTransform(w);
-    w.finish();
+BOOST_AUTO_TEST_CASE(IntervalDHash) {
+    utils::assertValidHash<IntervalD>();
+    utils::assertHashesEqual(IntervalD::fromMinMax(-2.0, 2.0), IntervalD::fromMinSize(-2.0, 4.0));
+    utils::assertHashesEqual(IntervalD(), IntervalD::fromMinMax(1.0, -1.0));
 }
 
 }  // namespace geom
