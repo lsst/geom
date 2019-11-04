@@ -140,8 +140,7 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
 
     def testConversion(self):
         for n in range(10):
-            xmin, xmax, ymin, ymax = np.random.uniform(
-                low=-10, high=10, size=4)
+            xmin, xmax, ymin, ymax = np.random.uniform(low=-10, high=10, size=4)
             if xmin > xmax:
                 xmin, xmax = xmax, xmin
             if ymin > ymax:
@@ -150,19 +149,18 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
             fpMax = geom.Point2D(xmax, ymax)
             if any((fpMax-fpMin).lt(3)):
                 continue  # avoid empty boxes
-            fpBox = geom.Box2D(fpMin, fpMax)
-            intBoxBig = geom.Box2I(fpBox, geom.Box2I.EXPAND)
-            fpBoxBig = geom.Box2D(intBoxBig)
-            intBoxSmall = geom.Box2I(fpBox, geom.Box2I.SHRINK)
-            fpBoxSmall = geom.Box2D(intBoxSmall)
-            self.assertTrue(fpBoxBig.contains(fpBox))
-            self.assertTrue(fpBox.contains(fpBoxSmall))
-            self.assertTrue(intBoxBig.contains(intBoxSmall))
-            self.assertTrue(geom.Box2D(intBoxBig))
-            self.assertEqual(geom.Box2I(
-                fpBoxBig, geom.Box2I.EXPAND), intBoxBig)
-            self.assertEqual(geom.Box2I(
-                fpBoxSmall, geom.Box2I.SHRINK), intBoxSmall)
+            with self.subTest(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax):
+                fpBox = geom.Box2D(fpMin, fpMax)
+                intBoxBig = geom.Box2I(fpBox, geom.Box2I.EXPAND)
+                fpBoxBig = geom.Box2D(intBoxBig)
+                intBoxSmall = geom.Box2I(fpBox, geom.Box2I.SHRINK)
+                fpBoxSmall = geom.Box2D(intBoxSmall)
+                self.assertTrue(fpBoxBig.contains(fpBox))
+                self.assertTrue(fpBox.contains(fpBoxSmall))
+                self.assertTrue(intBoxBig.contains(intBoxSmall))
+                self.assertTrue(geom.Box2D(intBoxBig))
+                self.assertEqual(geom.Box2I(fpBoxBig, geom.Box2I.SHRINK), intBoxBig)
+                self.assertEqual(geom.Box2I(fpBoxSmall, geom.Box2I.SHRINK), intBoxSmall)
         self.assertTrue(geom.Box2I(geom.Box2D()).isEmpty())
         self.assertRaises(lsst.pex.exceptions.InvalidParameterError, geom.Box2I,
                           geom.Box2D(geom.Point2D(), geom.Point2D(float("inf"), float("inf"))))
@@ -209,19 +207,33 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
     def testRelations(self):
         box = geom.Box2I(geom.Point2I(-2, -3), geom.Point2I(2, 1), True)
         self.assertNotEqual(box, (3, 4, 5))  # should not throw
-        self.assertTrue(box.contains(geom.Point2I(0, 0)))
-        self.assertTrue(box.contains(geom.Point2I(-2, -3)))
-        self.assertTrue(box.contains(geom.Point2I(2, -3)))
-        self.assertTrue(box.contains(geom.Point2I(2, 1)))
-        self.assertTrue(box.contains(geom.Point2I(-2, 1)))
-        self.assertFalse(box.contains(geom.Point2I(-2, -4)))
-        self.assertFalse(box.contains(geom.Point2I(-3, -3)))
-        self.assertFalse(box.contains(geom.Point2I(2, -4)))
-        self.assertFalse(box.contains(geom.Point2I(3, -3)))
-        self.assertFalse(box.contains(geom.Point2I(3, 1)))
-        self.assertFalse(box.contains(geom.Point2I(2, 2)))
-        self.assertFalse(box.contains(geom.Point2I(-3, 1)))
-        self.assertFalse(box.contains(geom.Point2I(-2, 2)))
+        inPoints = [
+            geom.Point2I(-2, -3),
+            geom.Point2I(2, -3),
+            geom.Point2I(0, 0),
+            geom.Point2I(2, 1),
+            geom.Point2I(-2, 1),
+        ]
+        outPoints = [
+            geom.Point2I(-2, -4),
+            geom.Point2I(-3, -3),
+            geom.Point2I(2, -4),
+            geom.Point2I(3, -3),
+            geom.Point2I(3, 1),
+            geom.Point2I(2, 2),
+            geom.Point2I(-3, 1),
+            geom.Point2I(-2, 2),
+        ]
+        for point in inPoints:
+            with self.subTest(point=point):
+                self.assertTrue(box.contains(point))
+        for point in outPoints:
+            with self.subTest(point=point):
+                self.assertFalse(box.contains(point))
+        inX, inY = zip(*inPoints)
+        outX, outY = zip(*outPoints)
+        self.assertTrue(all(box.contains(np.array(inX), np.array(inY))))
+        self.assertFalse(any(box.contains(np.array(outX), np.array(outY))))
         self.assertTrue(box.contains(geom.Box2I(
             geom.Point2I(-1, -2), geom.Point2I(1, 0))))
         self.assertTrue(box.contains(box))
@@ -394,11 +406,23 @@ class Box2DTestCase(lsst.utils.tests.TestCase):
 
     def testRelations(self):
         box = geom.Box2D(geom.Point2D(-2, -3), geom.Point2D(2, 1), True)
-        self.assertTrue(box.contains(geom.Point2D(0, 0)))
-        self.assertTrue(box.contains(geom.Point2D(-2, -3)))
-        self.assertFalse(box.contains(geom.Point2D(2, -3)))
-        self.assertFalse(box.contains(geom.Point2D(2, 1)))
-        self.assertFalse(box.contains(geom.Point2D(-2, 1)))
+        inPoints = [
+            geom.Point2D(0, 0),
+            geom.Point2D(-2, -3),
+        ]
+        outPoints = [
+            geom.Point2D(2, -3),
+            geom.Point2D(2, 1),
+            geom.Point2D(-2, 1),
+        ]
+        for point in inPoints:
+            with self.subTest(point=point):
+                self.assertTrue(box.contains(point))
+        for point in outPoints:
+            with self.subTest(point=point):
+                self.assertFalse(box.contains(point))
+        inX, inY = zip(*inPoints)
+        outX, outY = zip(*outPoints)
         self.assertTrue(box.contains(geom.Box2D(
             geom.Point2D(-1, -2), geom.Point2D(1, 0))))
         self.assertTrue(box.contains(box))

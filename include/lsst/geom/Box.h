@@ -29,6 +29,7 @@
 
 #include "lsst/geom/Point.h"
 #include "lsst/geom/Extent.h"
+#include "lsst/geom/Interval.h"
 
 namespace lsst {
 namespace geom {
@@ -56,6 +57,8 @@ public:
     typedef Point2I Point;
     typedef Extent2I Extent;
     typedef int Element;
+
+    using Interval = IntervalI;
 
     enum EdgeHandlingEnum { EXPAND, SHRINK };
 
@@ -85,6 +88,16 @@ public:
      * @throws lsst::pex::exceptions::OverflowError Thrown if the maximum Point2I would overflow.
      */
     Box2I(Point2I const& corner, Extent2I const& dimensions, bool invert = true);
+
+    /**
+     *  Construct a box from a pair of intervals.
+     *
+     *  @param[in] x   Extent in x direction.
+     *  @param[in] y   Extent in y direction.
+     */
+    Box2I(Interval const & x, Interval const & y) :
+        Box2I(Point(x.getMin(), y.getMin()), Point(x.getMax(), y.getMax()), false)
+    {}
 
     /**
      *  Construct an integer box from a floating-point box.
@@ -187,14 +200,23 @@ public:
     double getCenterY() const noexcept { return this->getCenter().getY(); }
     //@}
 
+    /// 1-d interval accessors
+    //@{
+    Interval getX() const { return Interval::fromMinSize(getMinX(), getWidth()); }
+    Interval getY() const { return Interval::fromMinSize(getMinY(), getHeight()); }
+    //@}
+
     /// Return slices to extract the box's region from an ndarray::Array.
     ndarray::View<boost::fusion::vector2<ndarray::index::Range, ndarray::index::Range> > getSlices() const;
 
     /// Return true if the box contains no points.
     bool isEmpty() const noexcept { return _dimensions.getX() == 0 && _dimensions.getY() == 0; }
 
+    //@{
     /// Return true if the box contains the point.
     bool contains(Point2I const& point) const noexcept;
+    bool contains(Element x, Element y) const noexcept { return contains(Point2I(x, y)); }
+    //@}
 
     /**
      *  Return true if all points contained by other are also contained by this.
@@ -203,12 +225,20 @@ public:
      */
     bool contains(Box2I const& other) const noexcept;
 
+    //@{
     /**
      *  Return true if any points in other are also in this.
      *
      *  Any overlap operation involving an empty box returns false.
      */
     bool overlaps(Box2I const& other) const noexcept;
+    bool intersects(Box2I const& other) const noexcept { return overlaps(other); }
+    //@}
+
+    /**
+     *  Return true if there are no points in both `this` and `other`.
+     */
+    bool isDisjointFrom(Box2I const & other) const noexcept;
 
     /**
      *  Increase the size of the box by the given buffer amount in all directions.
@@ -248,6 +278,84 @@ public:
      * @param other the box that must contain this one
      */
     void clip(Box2I const& other) noexcept;
+
+    /**
+     *  Increase the size of the box by the given amount(s) on all sides
+     *  (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to eroding by `-buffer`.
+     *
+     *  If a final dimension of the box is less than or equal to zero, the new
+     *  box will be empty.
+     *
+     *  Empty boxes remain empty after dilation.
+     */
+    //@{
+    Box2I dilatedBy(Extent const & buffer) const;
+    Box2I dilatedBy(Element buffer) const {
+        return dilatedBy(Extent(buffer, buffer));
+    }
+    //@}
+
+    /**
+     *  Decrease the size of the box by the given amount(s) on all sides
+     *  (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to dilating by `-buffer`.
+     *
+     *  If a final dimension of the box is less than or equal to zero, the new
+     *  box will be empty.
+     *
+     *  Empty boxes remain empty after erosion.
+     */
+    //@{
+    Box2I erodedBy(Extent const & buffer) const { return dilatedBy(-buffer); }
+    Box2I erodedBy(Element buffer) const { return dilatedBy(-buffer); }
+    //@}
+
+    /**
+     * Shift the position of the box by the given offset (returning a new
+     * object).
+     *
+     * Empty boxes remain empty when shifted.
+     */
+    Box2I shiftedBy(Extent const & offset) const;
+
+    /**
+     * Reflect the box about a vertical line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     */
+    Box2I reflectedAboutX(Element x) const;
+
+    /**
+     * Reflect the box about a horizontal line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     */
+    Box2I reflectedAboutY(Element y) const;
+
+    //@{
+    /**
+     * Expand the box to ensure that `contains(other)` is true (returning a
+     * new object).
+     *
+     * Expanding an empty box with a single point yields an box with size=1 at
+     * that point; expanding an empty box with a second box is equivalent to
+     * assignment.
+     */
+    Box2I expandedTo(Point const & other) const;
+    Box2I expandedTo(Box2I const & other) const;
+    //@}
+
+    /**
+     * Shrink an interval to ensure that it is contained by other (returning a
+     * new object).
+     *
+     * In particular, if `other` and this interval do not overlap this
+     * interval will become empty.
+     */
+    Box2I clippedTo(Box2I const & other) const noexcept;
 
     /**
      *  Compare two boxes for equality.
@@ -308,6 +416,8 @@ public:
     typedef Extent2D Extent;
     typedef double Element;
 
+    using Interval = IntervalD;
+
     /**
      *  Value the maximum coordinate is multiplied by to increase it by the smallest
      *  possible amount.
@@ -343,6 +453,16 @@ public:
      *                        an empty box.
      */
     Box2D(Point2D const& corner, Extent2D const& dimensions, bool invert = true) noexcept;
+
+    /**
+     *  Construct a box from a pair of intervals.
+     *
+     *  @param[in] x   Extent in x direction.
+     *  @param[in] y   Extent in y direction.
+     */
+    Box2D(Interval const & x, Interval const & y) :
+        Box2D(Point(x.getMin(), y.getMin()), Point(x.getMax(), y.getMax()), false)
+    {}
 
     /**
      *  Construct a floating-point box from an integer box.
@@ -414,6 +534,12 @@ public:
     }
     //@}
 
+    //@{
+    /// 1-d interval accessors
+    Interval getX() const { return Interval::fromMinMax(getMinX(), getMaxX()); }
+    Interval getY() const { return Interval::fromMinMax(getMinY(), getMaxY()); }
+    //@}
+
     /**
      *  @name Center Accessors
      *
@@ -430,22 +556,34 @@ public:
     /// Return true if the box contains no points.
     bool isEmpty() const noexcept { return _minimum.getX() != _minimum.getX(); }
 
+    //@{
     /// Return true if the box contains the point.
     bool contains(Point2D const& point) const noexcept;
+    bool contains(Element x, Element y) const noexcept { return contains(Point2D(x, y)); }
+    //@}
 
     /**
      *  Return true if all points contained by other are also contained by this.
      *
      *  An empty box is contained by every other box, including other empty boxes.
      */
-    bool contains(Box2D const& other) const noexcept;
+    bool contains(Box2D const& other) const;
 
+    //@{
     /**
      *  Return true if any points in other are also in this.
      *
      *  Any overlap operation involving an empty box returns false.
      */
     bool overlaps(Box2D const& other) const noexcept;
+    bool intersects(Box2D const& other) const noexcept { return overlaps(other); }
+    //@}
+
+
+    /**
+     *  Return true if there are no points in both `this` and `other`.
+     */
+    bool isDisjointFrom(Box2D const & other) const noexcept;
 
     /**
      *  Increase the size of the box by the given buffer amount in all directions.
@@ -491,6 +629,109 @@ public:
      * @param other the box that must contain this one
      */
     void clip(Box2D const& other) noexcept;
+
+    //@{
+    /**
+     *  Increase the size of the box by the given amount(s) on all sides
+     *  (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to eroding by `-buffer`.
+     *
+     *  If the final size of the box is less than zero in either dimension the
+     *  new box will empty.
+     *
+     *  Empty boxes remain empty after dilation.  Infinite bounds are
+     *  unaffected by dilation.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `buffer` is not finite.
+     */
+    Box2D dilatedBy(Extent const & buffer) const;
+    Box2D dilatedBy(Element buffer) const {
+        return dilatedBy(Extent(buffer, buffer));
+    }
+    //@}
+
+    //@{
+    /**
+     *  Decrease the size of the box by the given amount(s) on all sides
+     *  (returning a new object).
+     *
+     *  If `buffer` is negative, this is equivalent to dilating by `-buffer`.
+     *
+     *  If the final size of the box is less than zero in either dimension the
+     *  new box will empty.
+     *
+     *  Empty boxes remain empty after erosion.  Infinite bounds are
+     *  unaffected by erosion.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `buffer` is not finite.
+     */
+    Box2D erodedBy(Extent const & buffer) const { return dilatedBy(-buffer); }
+    Box2D erodedBy(Element buffer) const { return dilatedBy(-buffer); }
+    //@}
+
+    /**
+     *  Shift the position of the box by the given offset (returning a new
+     *  object).
+     *
+     *  Empty boxes remain empty when shifted.  Infinite bounds are
+     *  unaffected by shifting.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `offset` is not finite.
+     */
+    Box2D shiftedBy(Extent const & offset) const;
+
+    /**
+     * Reflect the box about a vertical line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `x` is not finite.
+     */
+    Box2D reflectedAboutX(Element x) const;
+
+    /**
+     * Reflect the box about a horizontal line (returning a new object).
+     *
+     * Empty boxes remain empty when reflected.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if
+     *      `y` is not finite.
+     */
+    Box2D reflectedAboutY(Element y) const;
+
+    /**
+     *  Expand a box to ensure that `contains(other)` is true (returning a new
+     *  object).
+     *
+     *  Expanding an empty box with a single point yields a box with
+     *  `dimensions == (0, 0)` at that point.
+     *
+     *  @throws lsst::pex::exceptions::InvalidParameterError  Thrown if `other`
+     *       is not finite.
+     */
+    Box2D expandedTo(Point const & other) const;
+
+    /**
+     *  Expand a box to ensure that `contains(other)` is true (returning a new
+     *  object).
+     *
+     *  Expanding an empty box with a second box is equivalent to assignment.
+     */
+    Box2D expandedTo(Box2D const & other) const;
+
+    /**
+     * Shrink a box to ensure that it is contained by other (returning a new
+     * object).
+     *
+     * In particular, if `other` and `this` do not overlap, the new box will
+     * be empty.
+     */
+    Box2D clippedTo(Box2D const & other) const;
 
     /**
      *  Compare two boxes for equality.

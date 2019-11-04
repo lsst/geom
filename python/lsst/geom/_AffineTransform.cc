@@ -64,6 +64,27 @@ void wrapAffineTransform(utils::python::WrapperCollection & wrappers) {
                     py::overload_cast<Point2D const &>(&AffineTransform::operator(), py::const_));
             cls.def("__call__",
                     py::overload_cast<Extent2D const &>(&AffineTransform::operator(), py::const_));
+            cls.def("__call__",
+                    // We use pybind11's wrappers for the Python C API to
+                    // delegate to other wrapped methods because:
+                    //  - defining this in pure Python is tricky because it's
+                    //    an overload, not a standalone method;
+                    //  - we'd rather not add a new pure-Python file just for
+                    //    this;
+                    //  - using py::vectorize internal to the method would
+                    //    involve defining a new internal callable every time
+                    //    this method is called.
+                    // The other viable alternative would be to define
+                    // applyX and applyY as Python callables with py::vectorize
+                    // outside the lambda as C++ local variables, and then
+                    // capture them by value in the lambda.  This just seems
+                    // slightly cleaner, as it's closer to how one would
+                    // implement this in pure Python, if it wasn't an overload.
+                    [](py::object self, py::object x, py::object y) {
+                        return py::make_tuple(self.attr("applyX")(x, y),
+                                              self.attr("applyY")(x, y));
+                    },
+                    "x"_a, "y"_a);
             cls.def("__setitem__", [](AffineTransform &self, int i, double value) {
                 if (i < 0 || i > 5) {
                     PyErr_Format(PyExc_IndexError, "Invalid index for AffineTransform: %d", i);
@@ -103,6 +124,8 @@ void wrapAffineTransform(utils::python::WrapperCollection & wrappers) {
             cls.def("getMatrix", &AffineTransform::getMatrix);
             cls.def("getParameterVector", &AffineTransform::getParameterVector);
             cls.def("setParameterVector", &AffineTransform::setParameterVector);
+            cls.def("applyX", py::vectorize(&AffineTransform::applyX), "x"_a, "y"_a);
+            cls.def("applyY", py::vectorize(&AffineTransform::applyY), "x"_a, "y"_a);
             cls.def_static("makeScaling", py::overload_cast<double>(&AffineTransform::makeScaling));
             cls.def_static("makeScaling", py::overload_cast<double, double>(&AffineTransform::makeScaling));
             cls.def_static("makeRotation", &AffineTransform::makeRotation, "angle"_a);

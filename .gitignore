@@ -26,4 +26,5 @@ tests/test_box
 tests/test_polynomials
 tests/test_coordinates
 tests/test_spherePoint
+tests/test_interval
 version.py
