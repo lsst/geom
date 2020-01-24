@@ -206,8 +206,8 @@ class IntervalTests:
             for rhs in self.intervals.nonempty:
                 with self.subTest(lhs=lhs, rhs=rhs):
                     self.assertEqual(lhs.overlaps(rhs),
-                                     lhs.contains(rhs.min) or lhs.contains(rhs.max) or
-                                     rhs.contains(lhs.min) or rhs.contains(lhs.max))
+                                     lhs.contains(rhs.min) or lhs.contains(rhs.max)
+                                     or rhs.contains(lhs.min) or rhs.contains(lhs.max))
             for rhs in self.intervals.empty:
                 with self.subTest(lhs=lhs, rhs=rhs):
                     self.assertFalse(lhs.overlaps(rhs))
