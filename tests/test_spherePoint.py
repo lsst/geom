@@ -480,12 +480,15 @@ class SpherePointTestSuite(lsst.utils.tests.TestCase):
             point2 = SpherePoint(lon, lat)
             point3 = SpherePoint(lon + delta, lat)
 
-            self.assertTrue(point1 != point2 or point2 !=
-                            point3 or point1 == point3)
-            self.assertTrue(point3 != point1 or point1 !=
-                            point2 or point3 == point2)
-            self.assertTrue(point2 == point3 or point3 !=
-                            point1 or point2 == point1)
+            self.assertTrue(point1 != point2
+                            or point2 != point3
+                            or point1 == point3)
+            self.assertTrue(point3 != point1
+                            or point1 != point2
+                            or point3 == point2)
+            self.assertTrue(point2 == point3
+                            or point3 != point1
+                            or point2 == point1)
 
     def testBearingToValueOnEquator(self):
         """Test if bearingTo() returns the expected value from a point on the equator
@@ -919,8 +922,7 @@ class SpherePointTestSuite(lsst.utils.tests.TestCase):
                 self.assertAlmostEqual(
                     point.getLatitude().asDegrees(), float(numbers[1]), delta=1e-6)
                 # Latitude must be signed
-                self.assertTrue(numbers[1].startswith("+") or
-                                numbers[1].startswith("-"))
+                self.assertIn(numbers[1][0], ("+", "-"))
             else:
                 # Some C++ compilers will output NaN with a sign, others won't
                 self.assertRegex(numbers[1], r'(?:\+|-)?nan')
