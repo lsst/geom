@@ -17,6 +17,7 @@ Using lsst.geom
    :maxdepth: 1
 
    getting-started
+   operators
 
 .. _lsst.geom-contributing:
 
