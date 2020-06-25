@@ -64,10 +64,12 @@ def assertAnglesAlmostEqual(testCase, ang0, ang1, maxDiff=0.001*arcseconds,
         maximum difference between the two angles
     ignoreWrap : `bool`
         ignore wrap when comparing the angles?
+
         - if True then wrap is ignored, e.g. 0 and 360 degrees are considered
           equal
         - if False then wrap matters, e.g. 0 and 360 degrees are considered
           different
+
     msg : `str`
         exception message prefix; details of the error are appended after ": "
 
