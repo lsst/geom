@@ -25,8 +25,8 @@ from lsst.utils import continueClass
 from ._geom import Angle, AngleUnit
 
 
-@continueClass  # noqa F811
-class AngleUnit:
+@continueClass  # noqa: F811 (FIXME: remove for py 3.8+)
+class AngleUnit:  # noqa: F811
 
     def __mul__(self, other):
         if isinstance(other, (Angle, AngleUnit)):

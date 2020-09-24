@@ -27,8 +27,8 @@ from lsst.utils import continueClass
 from ._geom import Box2I
 
 
-@continueClass  # noqa: F811
-class Box2I:
+@continueClass  # noqa: F811 (FIXME: remove for py 3.8+)
+class Box2I:  # noqa: F811
 
     def grid(self, dtype=np.int32):
         """Return pair of arrays with the centers of all pixels in the box.
