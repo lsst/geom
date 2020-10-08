@@ -27,8 +27,8 @@ from lsst.utils import continueClass
 from ._geom import IntervalI
 
 
-@continueClass  # noqa: F811
-class IntervalI:
+@continueClass  # noqa: F811 (FIXME: remove for py 3.8+)
+class IntervalI:  # noqa: F811
 
     def range(self):
         """Return a `range` object containing all points in the interval.
