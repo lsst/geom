@@ -38,8 +38,8 @@ class TransformTests:
         for i in range(4):
             for j in range(3):
                 x3, y3 = self.transform(Point2D(x1[i, j], y1[i, j]))
-                self.assertEqual(x3, x2[i, j])
-                self.assertEqual(y3, y2[i, j])
+                self.assertFloatsAlmostEqual(x3, x2[i, j])
+                self.assertFloatsAlmostEqual(y3, y2[i, j])
 
 
 class LinearTransformTestCase(lsst.utils.tests.TestCase, TransformTests):
