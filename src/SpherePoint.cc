@@ -251,9 +251,10 @@ SpherePoint averageSpherePoint(std::vector<SpherePoint> const& coords) {
 }
 
 ostream& operator<<(ostream& os, SpherePoint const& point) {
-    // Can't provide atomic guarantee anyway for I/O, so ok to be sloppy.
+    // Can't provide atomic guarantee anyway for I/O, so ok to set ostream states here.
     auto oldFlags = os.setf(ostream::fixed);
-    auto oldPrecision = os.precision(6);
+    // 10 digits of precision for a value in degrees is about 1 milliarcsecond
+    auto oldPrecision = os.precision(10);
 
     os << "(" << point.getLongitude().asDegrees() << ", ";
     os.setf(ostream::showpos);
