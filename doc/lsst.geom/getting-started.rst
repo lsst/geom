@@ -48,3 +48,8 @@ Sample code showing basic usage of some of the geom classes::
     spherePoint2 = lsst.geom.SpherePoint(10*lsst.geom.degrees, 32*lsst.geom.degrees)
     assert math.isclose(spherePoint1.separation(spherePoint2).asDegrees(), 15)
 
+Integer and floating point boxes
+================================
+
+The integer and floating point bounding boxes (`~lsst.geom.Box2I`/`~lsst.geom.Box2D`) that are defined in this package have fundamental differences in behavior that can be surprising, particularly when casting between them.
+The :ref:`lsst.afw.image` package details some of those differences in relation to how they interact with :ref:`~lsst.afw.image.Image` (the typical usage) at :ref:`float-int-bounding-boxes`.
