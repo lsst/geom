@@ -65,8 +65,8 @@ void declareCommonIntervalInterface(PyClass &cls) {
             }
         }
         PyErr_SetString(PyExc_TypeError,
-                        "General constructor requires exactly 2 of the following keyword-only "
-                        "arguments: (min, max, center, size).");
+                        "General constructor requires one of the following keyword-only "
+                        "argument pairs: (min, max), (center, size), (min, size), (max, size).");
         throw py::error_already_set();
     }));
     cls.def(py::init<T const &>());
