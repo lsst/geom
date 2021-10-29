@@ -261,8 +261,11 @@ public:
 
     //@{
     /// Test if two Angles represent the same angle (without wrapping).
-    ANGLE_COMP(==)
-    ANGLE_COMP(!=)
+    // For some reason, isnan can't be used in constexpr
+    bool operator==(const Angle& rhs) const noexcept {
+        return (std::isnan(_val) && std::isnan(rhs._val)) || _val == rhs._val;
+    }
+    bool operator!=(const Angle& rhs) const noexcept { return !(*this == rhs); }
     //@}
     //@{
     /// Compare the sizes of two Angles (without wrapping).

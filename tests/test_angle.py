@@ -59,6 +59,20 @@ class AngleTestCase(lsst.utils.tests.TestCase):
         dd = lsst.geom.Angle(60*60*180*1000, lsst.geom.milliarcseconds)
         self.assertEqual(self.d, dd)
 
+    def testEquals(self):
+        self.assertEqual(0 * lsst.geom.arcminutes, 0 * lsst.geom.arcminutes)
+        self.assertEqual(42 * lsst.geom.degrees, 42 * lsst.geom.degrees)
+        self.assertEqual(np.nan * lsst.geom.radians, np.nan * lsst.geom.radians)
+        self.assertNotEqual(0 * lsst.geom.arcminutes, self.pi)
+
+        # equality must be reflexive
+        self.assertEqual(self.pi, self.pi)
+        self.assertEqual(self.d, self.d)
+        angle = 42 * lsst.geom.degrees
+        self.assertEqual(angle, angle)
+        angle = np.nan * lsst.geom.radians
+        self.assertEqual(angle, angle)
+
     def testArithmetic(self):
         self.assertTrue(lsst.geom.isAngle(self.pi))
         self.assertFalse(lsst.geom.isAngle(self.pi.asRadians()))
