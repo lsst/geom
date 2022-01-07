@@ -104,13 +104,18 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
             # usually sizeof(long).
             self.assertLess(box.getWidth(), 0)
 
-    def testRepr(self):
-        box = geom.Box2I()
-        repr_str = box.__repr__()
-        self.assertTrue(repr_str.startswith('Box2I'))
-        box = geom.Box2D()
-        repr_str = box.__repr__()
-        self.assertTrue(repr_str.startswith('Box2D'))
+    def test_Box2I_repr(self):
+        from lsst.geom import Box2I, Point2I, Extent2I
+        self.assertEqual(eval(repr(Box2I())), Box2I())
+        self.assertEqual(eval(repr(Box2I(Point2I(1, 2), Extent2I(3, 4)))),
+                         Box2I(Point2I(1, 2), Extent2I(3, 4)))
+
+    def test_Box2D_repr(self):
+        from lsst.geom import Box2D, Point2D, Extent2D
+        print(repr(Box2D()))
+        self.assertEqual(eval(repr(Box2D())), Box2D())
+        self.assertEqual(eval(repr(Box2D(Point2D(1.0, 2.0), Extent2D(3.0, 4.0)))),
+                         Box2D(Point2D(1.0, 2.0), Extent2D(3.0, 4.0)))
 
     def testPointExtent(self):
         box = geom.Box2I()

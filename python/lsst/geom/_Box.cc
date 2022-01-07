@@ -130,7 +130,7 @@ void wrapBox(utils::python::WrapperCollection & wrappers) {
             cls.def("getCorners", &Box2I::getCorners);
             cls.def("toString", &Box2I::toString);
             cls.def("__repr__", [](Box2I const &self) {
-                return py::str("Box2I(minimum={}, dimensions={})")
+                return py::str("Box2I(corner={}, dimensions={})")
                     .format(py::repr(py::cast(self.getMin())), py::repr(py::cast(self.getDimensions())));
             });
             cls.def("__str__", [](Box2I const &self) {
@@ -235,7 +235,7 @@ void wrapBox(utils::python::WrapperCollection & wrappers) {
             cls.def("getCorners", &Box2D::getCorners);
             cls.def("toString", &Box2D::toString);
             cls.def("__repr__", [](Box2D const &self) {
-                return py::str("Box2D(minimum={}, dimensions={})")
+                return py::str("Box2D(corner={}, dimensions={})")
                     .format(py::repr(py::cast(self.getMin())), py::repr(py::cast(self.getDimensions())));
             });
             cls.def("__str__", [](Box2D const &self) {
