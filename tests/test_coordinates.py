@@ -113,6 +113,24 @@ class CoordinateTestCase:
             self.assertEqual(type(p1.gt(scalar)), CoordinateExpr)
             self.assertEqual(type(p1.ge(scalar)), CoordinateExpr)
 
+    def test_repr(self):
+        # repr uses unqualified names, so we need to bring them all in
+        # scope for eval(repr(...)) to work.
+        from lsst.geom import (  # noqa: F401
+            Extent2D,
+            Extent2I,
+            Extent3D,
+            Extent3I,
+            Point2D,
+            Point2I,
+            Point3D,
+            Point3I,
+        )
+        for _, cls, rnd in self.classes:
+            p = cls(*rnd())
+            self.assertEqual(eval(repr(p)), p)
+            self.assertEqual(eval(repr(cls())), cls())
+
 
 class PointTestCase(CoordinateTestCase, lsst.utils.tests.TestCase):
     """A test case for Point"""

@@ -22,6 +22,8 @@
 __all__ = ["CoordinateExpr", "Extent", "ExtentI", "ExtentD",
            "Point", "PointI", "PointD"]
 
+import math
+
 from lsst.utils import TemplateMeta
 
 from . import _geom
@@ -33,7 +35,7 @@ def _coordinateStr(self):
 
 def _coordinateRepr(self):
     return "{}({})".format(type(self).__name__,
-                           ", ".join("%0.10g" % v for v in self))
+                           ", ".join(f"{v:0.17g}" if math.isfinite(v) else f"float('{v}')" for v in self))
 
 
 def _coordinateReduce(self):
