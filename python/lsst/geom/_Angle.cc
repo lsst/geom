@@ -124,6 +124,8 @@ void wrapAngle(utils::python::WrapperCollection & wrappers) {
             cls.def("separation", &Angle::separation);
             mod.def("isAngle", isAngle<Angle>);
             mod.def("isAngle", isAngle<double>);
+            py::implicitly_convertible<Angle, sphgeom::Angle>();
+            py::implicitly_convertible<sphgeom::Angle, Angle>();
         }
     );
 
