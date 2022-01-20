@@ -110,7 +110,13 @@ void wrapAngle(utils::python::WrapperCollection & wrappers) {
                 return py::make_tuple(cls, py::make_tuple(py::cast(self.asRadians())));
             });
             utils::python::addOutputOp(cls, "__str__");
-            utils::python::addOutputOp(cls, "__repr__");
+            cls.def("__repr__", [](Angle const & self) {
+                if (std::isfinite(self.asDegrees())) {
+                    return py::str("Angle({:0.17g}, degrees)").format(self.asDegrees());
+                } else {
+                    return py::str("Angle(float('{}'), degrees)").format(self.asDegrees());
+                }
+            });
             cls.def("asAngularUnits", &Angle::asAngularUnits);
             cls.def("asRadians", &Angle::asRadians);
             cls.def("asDegrees", &Angle::asDegrees);
@@ -124,6 +130,8 @@ void wrapAngle(utils::python::WrapperCollection & wrappers) {
             cls.def("separation", &Angle::separation);
             mod.def("isAngle", isAngle<Angle>);
             mod.def("isAngle", isAngle<double>);
+            py::implicitly_convertible<Angle, sphgeom::Angle>();
+            py::implicitly_convertible<sphgeom::Angle, Angle>();
         }
     );
 

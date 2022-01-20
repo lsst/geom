@@ -251,6 +251,16 @@ class AngleTestCase(lsst.utils.tests.TestCase):
                 self.assertLessEqual(nearAngArcsec - refAngArcsec, oneEightyWithSlop * 3600)
                 self.assertLessEqual(nearAngMilliarcsec - refAngMilliarcsec, oneEightyWithSlop * 3.6e6)
 
+    def test_repr(self):
+        """Test that eval(repr(Angle)) round-trips for finite and non-finite
+        values.
+        """
+        from lsst.geom import Angle, degrees  # need symbols in scope for eval
+        d = 4.0 / 7.0
+        self.assertEqual(eval(repr(Angle(d, degrees))), Angle(d, degrees))
+        self.assertEqual(eval(repr(Angle(float("inf"), degrees))), Angle(float("inf"), degrees))
+        self.assertTrue(np.isnan(eval(repr(Angle(float("NaN"), degrees))).asDegrees()))
+
 
 class MemoryTester(lsst.utils.tests.MemoryTestCase):
     pass

@@ -42,7 +42,7 @@ class SpherePoint:  # noqa: F811
             yield self[i]
 
     def __repr__(self):
-        argList = ["%r*geom.degrees" % (pos.asDegrees(),) for pos in self]
+        argList = ["%r*degrees" % (pos.asDegrees(),) for pos in self]
         return "SpherePoint(%s)" % (", ".join(argList))
 
     @staticmethod

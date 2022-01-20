@@ -25,6 +25,7 @@
 #include <iostream>
 #include <type_traits>
 
+#include "lsst/sphgeom/Angle.h"
 #include "boost/math/constants/constants.hpp"
 
 namespace lsst {
@@ -138,6 +139,9 @@ public:
     /// Construct the zero angle.
     constexpr Angle() noexcept : _val(0) {}
 
+    /// Convert from a sphgeom::Angle instance.
+    explicit Angle(sphgeom::Angle const & sgAngle) noexcept : Angle(sgAngle.asRadians()) {}
+
     /// Copy constructor.
     constexpr Angle(Angle const& other) noexcept = default;
 
@@ -154,6 +158,9 @@ public:
 
     /// Convert an Angle to a double in radians.
     constexpr operator double() const noexcept { return _val; }
+
+    /// Convert to a sphgeom::Angle instance.
+    operator sphgeom::Angle() const noexcept { return sphgeom::Angle::fromRadians(_val); }
 
     /**
      * Return an Angle's value in the specified units.
