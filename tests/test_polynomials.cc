@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(simplified2d) {
             // in a way that depends on the relative values in the sum.
             // Tolerance is selected to work for these test values, so think
             // of this as a regression test, not something fundamental.
-            CUSTOM_CHECK_CLOSE(sfunc(point), func(point), 100*DEFAULT_RTOL);
+            CUSTOM_CHECK_CLOSE(sfunc(point), func(point), 1000*DEFAULT_RTOL);
             // Second check: safe summation in simplifed() itself *and*
             // evaluating the polynomials.  We still lose a fair amount of
             // precision to operations other than the sum.
