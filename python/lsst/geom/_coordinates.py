@@ -42,6 +42,11 @@ def _coordinateReduce(self):
     return (type(self), tuple(self))
 
 
+def _coordinateIter(self):
+    for i in range(self.dimensions):
+        yield self[i]
+
+
 class CoordinateExpr(metaclass=TemplateMeta):
     """Abstract base class and factory for CoordinateExpr objects.
     """
@@ -50,6 +55,7 @@ class CoordinateExpr(metaclass=TemplateMeta):
     __str__ = _coordinateStr
     __repr__ = _coordinateRepr
     __reduce__ = _coordinateReduce
+    __iter__ = _coordinateIter
 
 
 CoordinateExpr.register(2, _geom.CoordinateExpr2)
@@ -65,6 +71,7 @@ class Extent(metaclass=TemplateMeta):
     __str__ = _coordinateStr
     __repr__ = _coordinateRepr
     __reduce__ = _coordinateReduce
+    __iter__ = _coordinateIter
 
 
 Extent.register((int, 2), _geom.Extent2I)
@@ -84,6 +91,7 @@ class Point(metaclass=TemplateMeta):
     __str__ = _coordinateStr
     __repr__ = _coordinateRepr
     __reduce__ = _coordinateReduce
+    __iter__ = _coordinateIter
 
 
 Point.register((int, 2), _geom.Point2I)
