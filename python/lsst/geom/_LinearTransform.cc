@@ -40,7 +40,7 @@ namespace geom {
 
 void wrapLinearTransform(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
-        py::class_<LinearTransform, std::shared_ptr<LinearTransform>>(wrappers.module, "LinearTransform"),
+        py::class_<LinearTransform>(wrappers.module, "LinearTransform"),
         [](auto & mod, auto & cls) {
 
             // Parameters enum is really only used as integer constants.

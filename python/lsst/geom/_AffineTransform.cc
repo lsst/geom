@@ -36,7 +36,7 @@ namespace geom {
 
 void wrapAffineTransform(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
-        py::class_<AffineTransform, std::shared_ptr<AffineTransform>>(wrappers.module, "AffineTransform"),
+        py::class_<AffineTransform>(wrappers.module, "AffineTransform"),
         [](auto & mod, auto & cls) mutable {
 
             // Parameters enum is really only used as integer constants.
