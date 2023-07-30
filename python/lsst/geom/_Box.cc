@@ -34,7 +34,7 @@ namespace geom {
 
 void wrapBox(utils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
-        py::class_<Box2I, std::shared_ptr<Box2I>>(wrappers.module, "Box2I"),
+        py::class_<Box2I>(wrappers.module, "Box2I"),
         [](auto & mod, auto & cls) mutable {
 
             cls.attr("Point") = mod.attr("Point2I");
@@ -152,7 +152,7 @@ void wrapBox(utils::python::WrapperCollection & wrappers) {
     );
 
     wrappers.wrapType(
-        py::class_<Box2D, std::shared_ptr<Box2D>>(wrappers.module, "Box2D"),
+        py::class_<Box2D>(wrappers.module, "Box2D"),
         [](auto & mod, auto & cls) mutable {
 
             cls.attr("Point") = mod.attr("Point2D");

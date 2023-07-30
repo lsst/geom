@@ -57,7 +57,7 @@ double toUnitZ(double longitude, double latitude) {
 } // anonymous
 
 
-using PySpherePoint = py::class_<SpherePoint, std::shared_ptr<SpherePoint>>;
+using PySpherePoint = py::class_<SpherePoint>;
 
 void wrapSpherePoint(utils::python::WrapperCollection & wrappers) {
     wrappers.addSignatureDependency("lsst.sphgeom");
