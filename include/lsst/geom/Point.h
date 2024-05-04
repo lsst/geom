@@ -234,6 +234,10 @@ public:
     template <typename U>
     explicit Point(Point<U, 2> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>);
 
+    template <typename U>
+    explicit Point(Extent<U, 2> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>)
+        : Super(Extent<T, 2>(other).asEigen()) {}
+
     /// Construct a Point from an Eigen vector.
     explicit Point(EigenVector const &vector) noexcept(Super::IS_ELEMENT_NOTHROW_COPYABLE) : Super(vector) {}
 
@@ -297,6 +301,10 @@ public:
     /// Explicit constructor from Extent.
     explicit Point(Extent<T, 3> const &other) noexcept(Super::IS_ELEMENT_NOTHROW_COPYABLE)
             : Super(other.asEigen()) {}
+
+    template <typename U>
+    explicit Point(Extent<U, 3> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>)
+        : Super(Extent<T, 3>(other).asEigen()) {}
 
     /// Explicit constructor from a sequence of doubles.
     explicit Point(T x, T y, T z) noexcept(Super::IS_ELEMENT_NOTHROW_COPYABLE)

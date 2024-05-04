@@ -19,9 +19,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "pybind11/pybind11.h"
-#include "pybind11/eigen.h"
-#include "ndarray/pybind11.h"
+#include "nanobind/nanobind.h"
+#include "nanobind/eigen/dense.h"
+#include "nanobind/ndarray.h"
+#include "nanobind/stl/vector.h"
+#include "nanobind/stl/list.h"
+#include "nanobind/stl/array.h"
+#include "nanobind/stl/tuple.h"
+
+#include "ndarray/nanobind.h"
 
 #include "lsst/geom/Point.h"
 #include "lsst/geom/Extent.h"
@@ -29,30 +35,39 @@
 #include "lsst/geom/CoordinateExpr.h"
 #include "lsst/cpputils/python.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nanobind::literals;
 
 namespace lsst {
 namespace geom {
 namespace {
+template<std::size_t N, typename T>
+struct TupleGenerator {
+    using type = decltype(std::tuple_cat(std::declval<std::tuple<T>>(), typename TupleGenerator<N-1, T>::type{}));
+};
+
+template<typename T>
+struct TupleGenerator<1, T> {
+    using type = std::tuple<T>;
+};
 
 template <typename Derived, typename T, int N>
-using PyCoordinateBase = py::class_<CoordinateBase<Derived, T, N>>;
+using PyCoordinateBase = nb::class_<CoordinateBase<Derived, T, N>>;
 
 template <int N>
-using PyCoordinateExpr = py::class_<CoordinateExpr<N>, CoordinateBase<CoordinateExpr<N>, bool, N>>;
+using PyCoordinateExpr = nb::class_<CoordinateExpr<N>, CoordinateBase<CoordinateExpr<N>, bool, N>>;
 
 template <typename T, int N>
-using PyExtentBase = py::class_<ExtentBase<T, N>, CoordinateBase<Extent<T, N>, T, N>>;
+using PyExtentBase = nb::class_<ExtentBase<T, N>, CoordinateBase<Extent<T, N>, T, N>>;
 
 template <typename T, int N>
-using PyExtent = py::class_<Extent<T, N>, ExtentBase<T, N>>;
+using PyExtent = nb::class_<Extent<T, N>, ExtentBase<T, N>>;
 
 template <typename T, int N>
-using PyPointBase = py::class_<PointBase<T, N>, CoordinateBase<Point<T, N>, T, N>>;
+using PyPointBase = nb::class_<PointBase<T, N>, CoordinateBase<Point<T, N>, T, N>>;
 
 template <typename T, int N>
-using PyPoint = py::class_<Point<T, N>, PointBase<T, N>>;
+using PyPoint = nb::class_<Point<T, N>, PointBase<T, N>>;
 
 template <typename Derived, typename T, int N>
 void declareCoordinateBase(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
@@ -78,7 +93,7 @@ void declareCoordinateExpr(cpputils::python::WrapperCollection & wrappers, std::
     wrappers.wrapType(
         PyCoordinateExpr<N>(wrappers.module, name.c_str()),
         [](auto & mod, auto & cls) {
-            cls.def(py::init<bool>(), "val"_a = false);
+            cls.def(nb::init<bool>(), "val"_a = false);
             cls.def("and_", &CoordinateExpr<N>::and_);
             cls.def("or_", &CoordinateExpr<N>::or_);
             cls.def("not_", &CoordinateExpr<N>::not_);
@@ -126,50 +141,50 @@ PyExtent<T, N> declareExtent(cpputils::python::WrapperCollection & wrappers, std
     return wrappers.wrapType(
         PyExtent<T, N>(wrappers.module, name.c_str()),
         [](auto & mod, auto & cls) {
-            cls.def(py::init<T>(), "value"_a = static_cast<T>(0));
-            cls.def(py::init<Point<int, N> const &>());
-            cls.def(py::init<Point<T, N> const &>());
-            cls.def(py::init<Extent<int, N> const &>());
-            cls.def(py::init<Extent<T, N> const &>());
-            cls.def(py::init<typename Extent<T, N>::EigenVector>());
+            cls.def(nb::init<T>(), "value"_a = static_cast<T>(0));
+            cls.def(nb::init<Point<int, N> const &>());
+            cls.def(nb::init<Point<T, N> const &>());
+            cls.def(nb::init<Extent<int, N> const &>());
+            cls.def(nb::init<Extent<T, N> const &>());
+            cls.def(nb::init<typename Extent<T, N>::EigenVector>());
             cls.def("__neg__", [](Extent<T, N> const &self) { return -self; });
             cls.def("__pos__", [](Extent<T, N> const &self) { return self; });
             cls.def("__mul__", [](Extent<T, N> const &self, int other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__mul__", [](Extent<T, N> const &self, double other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__rmul__", [](Extent<T, N> const &self, int other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__rmul__", [](Extent<T, N> const &self, double other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__add__",
                     [](Extent<T, N> const &self, Extent<int, N> const &other) { return self + other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__add__",
                     [](Extent<T, N> const &self, Extent<double, N> const &other) { return self + other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__add__",
                     [](Extent<T, N> const &self, Point<int, N> const &other) {
                         return self + Point<T, N>(other);
                     },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__add__",
                     [](Extent<T, N> const &self, Point<double, N> const &other) { return self + other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__",
                     [](Extent<T, N> const &self, Extent<int, N> const &other) {
                         return self - Extent<T, N>(other);
                     },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__",
                     [](Extent<T, N> const &self, Extent<double, N> const &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__eq__",
                     [](Extent<T, N> const &self, Extent<T, N> const &other) { return self == other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__ne__",
                     [](Extent<T, N> const &self, Extent<T, N> const &other) { return self != other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("clone", [](Extent<T, N> const &self) { return Extent<T, N>{self}; });
         }
     );
@@ -182,19 +197,19 @@ PyExtent<T, 2> declareExtent2(cpputils::python::WrapperCollection & wrappers, st
         declareExtent<T, 2>(wrappers, std::string("2") + suffix),
         [](auto & mod, auto & cls) {
             /* Members types and enums */
-            cls.def_property_readonly_static("dimensions", [](py::object /* cls */) { return 2; });
+            cls.def_prop_ro_static("dimensions", [](nb::object /* cls */) { return 2; });
             /* Constructors */
-            cls.def(py::init<int, int>(), "x"_a, "y"_a);
-            cls.def(py::init<double, double>(), "x"_a, "y"_a);
+            cls.def(nb::init<int, int>(), "x"_a, "y"_a);
+            cls.def(nb::init<double, double>(), "x"_a, "y"_a);
             /* Members */
-            auto getX = py::overload_cast<>(&Extent<T, 2>::getX, py::const_);
-            auto getY = py::overload_cast<>(&Extent<T, 2>::getY, py::const_);
+            auto getX = nb::overload_cast<>(&Extent<T, 2>::getX, nb::const_);
+            auto getY = nb::overload_cast<>(&Extent<T, 2>::getY, nb::const_);
             cls.def("getX", getX);
             cls.def("getY", getY);
             cls.def("setX", &Extent<T, 2>::setX);
             cls.def("setY", &Extent<T, 2>::setY);
-            cls.def_property("x", getX, &Extent<T, 2>::setX);
-            cls.def_property("y", getY, &Extent<T, 2>::setY);
+            cls.def_prop_rw("x", getX, &Extent<T, 2>::setX);
+            cls.def_prop_rw("y", getY, &Extent<T, 2>::setY);
         }
     );
 }
@@ -206,29 +221,29 @@ PyExtent<T, 3> declareExtent3(cpputils::python::WrapperCollection & wrappers, co
         declareExtent<T, 3>(wrappers, std::string("3") + suffix),
         [](auto & mod, auto & cls) mutable {
             /* Member types and enums */
-            cls.def_property_readonly_static("dimensions", [](py::object /* cls */) { return 3; });
+            cls.def_prop_ro_static("dimensions", [](nb::object /* cls */) { return 3; });
             /* Constructors */
-            cls.def(py::init<int, int, int>(), "x"_a, "y"_a, "z"_a);
-            cls.def(py::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
+            cls.def(nb::init<int, int, int>(), "x"_a, "y"_a, "z"_a);
+            cls.def(nb::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
             /* Members */
-            auto getX = py::overload_cast<>(&Extent<T, 3>::getX, py::const_);
-            auto getY = py::overload_cast<>(&Extent<T, 3>::getY, py::const_);
-            auto getZ = py::overload_cast<>(&Extent<T, 3>::getZ, py::const_);
+            auto getX = nb::overload_cast<>(&Extent<T, 3>::getX, nb::const_);
+            auto getY = nb::overload_cast<>(&Extent<T, 3>::getY, nb::const_);
+            auto getZ = nb::overload_cast<>(&Extent<T, 3>::getZ, nb::const_);
             cls.def("getX", getX);
             cls.def("getY", getY);
             cls.def("getZ", getZ);
             cls.def("setX", &Extent<T, 3>::setX);
             cls.def("setY", &Extent<T, 3>::setY);
             cls.def("setZ", &Extent<T, 3>::setZ);
-            cls.def_property("x", getX, &Extent<T, 3>::setX);
-            cls.def_property("y", getY, &Extent<T, 3>::setY);
-            cls.def_property("z", getZ, &Extent<T, 3>::setZ);
+            cls.def_prop_rw("x", getX, &Extent<T, 3>::setX);
+            cls.def_prop_rw("y", getY, &Extent<T, 3>::setY);
+            cls.def_prop_rw("z", getZ, &Extent<T, 3>::setZ);
         }
     );
 }
 
 // Declare mixed-type and type-overloaded operators for Extent with dimension
-// N for both int and double. Because pybind11 tries operators (like any
+// N for both int and double. Because nanobind tries operators (like any
 // overload) `in order', int has to come before double in any overloaded
 // operators that dispatch on a scalar, and hence they have to be defined here
 // instead of declareExtent.
@@ -244,71 +259,68 @@ void declareExtentOperators(cpputils::python::WrapperCollection & wrapper,
                      [](Extent<int, N> const &self, int other) -> Extent<int, N> {
                          return floor(self / static_cast<double>(other));
                      },
-                     py::is_operator());
+                     nb::is_operator());
 
             clsI.def("__truediv__", [](Extent<int, N> const &self, double other) { return self / other; },
-                     py::is_operator());
+                     nb::is_operator());
             clsD.def("__truediv__", [](Extent<double, N> const &self, double other) { return self / other; },
-                     py::is_operator());
+                     nb::is_operator());
 
             clsI.def("__ifloordiv__", [](Extent<int, N> &self, int other) -> Extent<int, N> & {
                 self = floor(self / static_cast<double>(other));
                 return self;
-            });
+            }, nb::rv_policy::none);
 
             clsI.def("__itruediv__", [](Extent<int, N> &self, double other) {
                 PyErr_SetString(PyExc_TypeError, "In-place true division not supported for Extent<int,N>.");
-                throw py::error_already_set();
-            });
+                throw nb::python_error();
+            }, nb::is_operator());
             clsD.def("__itruediv__", [](Extent<double, N> &self, double other) -> Extent<double, N> & {
                 self /= other;
                 return self;
-            });
+            }, nb::rv_policy::none);
 
             clsI.def("__iadd__", [](Extent<int, N> &self, Extent<int, N> const &other) -> Extent<int, N> & {
                 self += other;
                 return self;
-            });
+            }, nb::rv_policy::none);
             clsD.def(
-                "__iadd__",
-                [](Extent<double, N> &self, Extent<double, N> const &other) -> Extent<double, N> & {
-                    self += other;
+               "__iadd__",
+               [](Extent<double, N> &self, Extent<double, N> const &other) -> Extent<double, N> & {
+                   self += other;
                     return self;
-                }
-            );
+                } ,nb::rv_policy::none);
             clsD.def(
                 "__iadd__",
                 [](Extent<double, N> &self, Extent<int, N> const &other) -> Extent<double, N> & {
                     self += other;
                     return self;
-                }
-            );
-
+                }, nb::rv_policy::none);
             clsI.def("__isub__", [](Extent<int, N> &self, Extent<int, N> const &other) -> Extent<int, N> & {
                 self -= other;
                 return self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__isub__", [](Extent<double, N> &self, Extent<double, N> const &other) -> Extent<double, N> & {
                 self -= other;
                 return self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__isub__", [](Extent<double, N> &self, Extent<int, N> const &other) -> Extent<double, N> & {
                 self -= other;
                 return self;
-            });
+            }, nb::rv_policy::none);
 
             clsI.def("__imul__", [](Extent<int, N> &self, int other) -> Extent<int, N> & {
                 self *= other;
                 return self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__imul__", [](Extent<double, N> &self, int other) -> Extent<double, N> & {
                 self *= other;
                 return self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__imul__", [](Extent<double, N> &self, double other) -> Extent<double, N> & {
                 self *= other;
                 return self;
-            });
+            },  nb::rv_policy::none);
 
             // Operator-like free functions
             mod.def("truncate", truncate<N>);
@@ -359,37 +371,39 @@ template <typename T, int N>
 PyPoint<T, N> declarePoint(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "Point" + suffix;
     declarePointBase<T, N>(wrappers, suffix);
+    using tuple_t = typename TupleGenerator<N, T>::type;
     return wrappers.wrapType(
         PyPoint<T, N>(wrappers.module, name.c_str()),
         [](auto & mod, auto & cls) {
             /* Constructors */
-            cls.def(py::init<T>(), "value"_a = static_cast<T>(0));
+            cls.def(nb::init<T>(), "value"_a = static_cast<T>(0));
             // Note that we can't use T here because both types are needed
-            cls.def(py::init<Point<double, N> const &>());
-            cls.def(py::init<Point<int, N> const &>());
-            cls.def(py::init<Extent<T, N> const &>());
-            cls.def(py::init<typename Point<T, N>::EigenVector>());
+            cls.def(nb::init<Point<double, N> const &>());
+            cls.def(nb::init<Point<int, N> const &>());
+            cls.def(nb::init<Extent<int, N> const &>());
+            cls.def(nb::init<Extent<double, N> const &>());
+            cls.def(nb::init<typename Point<T, N>::EigenVector>());
             /* Operators */
             cls.def("__add__", [](Point<T, N> const &self, Extent<double, N> &other) { return self + other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__add__", [](Point<T, N> const &self, Extent<int, N> &other) { return self + other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Point<T, N> const &self, Point<T, N> &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Point<T, N> const &self, Extent<T, N> &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Point<T, N> const &self, Point<double, N> &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Point<T, N> const &self, Point<int, N> &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Point<T, N> const &self, Extent<double, N> &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Point<T, N> const &self, Extent<int, N> &other) { return self - other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__eq__", [](Point<T, N> const &self, Point<T, N> const &other) { return self == other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__ne__", [](Point<T, N> const &self, Point<T, N> const &other) { return self != other; },
-                    py::is_operator());
+                    nb::is_operator());
             /* Members */
             cls.def("clone", [](Point<T, N> const &self) { return Point<T, N>{self}; });
         }
@@ -403,19 +417,23 @@ PyPoint<T, 2> declarePoint2(cpputils::python::WrapperCollection & wrappers, std:
         declarePoint<T, 2>(wrappers, std::string("2") + suffix),
         [](auto & mod, auto & cls) {
             /* Member types and enums */
-            cls.def_property_readonly_static("dimensions", [](py::object /* cls */) { return 2; });
+            cls.def_prop_ro_static("dimensions", [](nb::object /* cls */) { return 2; });
             /* Constructors */
-            cls.def(py::init<int, int>(), "x"_a, "y"_a);
-            cls.def(py::init<double, double>(), "x"_a, "y"_a);
+            cls.def(nb::init<int, int>(), "x"_a, "y"_a);
+            cls.def(nb::init<double, double>(), "x"_a, "y"_a);
+
+            cls.def("__init__", [](Point<T, 2> *point, nb::tuple arg) {
+                    new (point) Point<T, 2>(nb::cast<T>(arg[0]), nb::cast<T>(arg[1]));
+            });
             /* Members */
-            auto getX = py::overload_cast<>(&Point<T, 2>::getX, py::const_);
-            auto getY = py::overload_cast<>(&Point<T, 2>::getY, py::const_);
+            auto getX = nb::overload_cast<>(&Point<T, 2>::getX, nb::const_);
+            auto getY = nb::overload_cast<>(&Point<T, 2>::getY, nb::const_);
             cls.def("getX", getX);
             cls.def("getY", getY);
             cls.def("setX", &Point<T, 2>::setX);
             cls.def("setY", &Point<T, 2>::setY);
-            cls.def_property("x", getX, &Point<T, 2>::setX);
-            cls.def_property("y", getY, &Point<T, 2>::setY);
+            cls.def_prop_rw("x", getX, &Point<T, 2>::setX);
+            cls.def_prop_rw("y", getY, &Point<T, 2>::setY);
         }
     );
 }
@@ -427,29 +445,32 @@ PyPoint<T, 3> declarePoint3(cpputils::python::WrapperCollection & wrappers, std:
         declarePoint<T, 3>(wrappers, std::string("3") + suffix),
         [](auto & mod, auto & cls) {
             /* Member types and enums */
-            cls.def_property_readonly_static("dimensions", [](py::object /* cls */) { return 3; });
+            cls.def_prop_ro_static("dimensions", [](nb::object /* cls */) { return 3; });
             /* Constructors */
-            cls.def(py::init<int, int, int>(), "x"_a, "y"_a, "z"_a);
-            cls.def(py::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
+            cls.def(nb::init<int, int, int>(), "x"_a, "y"_a, "z"_a);
+            cls.def(nb::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
+            cls.def("__init__", [](Point<T, 3> *point, nb::tuple arg) {
+                new (point) Point<T, 3>(nb::cast<T>(arg[0]), nb::cast<T>(arg[1]), nb::cast<T>(arg[2]));
+            });
             /* Members */
-            auto getX = py::overload_cast<>(&Point<T, 3>::getX, py::const_);
-            auto getY = py::overload_cast<>(&Point<T, 3>::getY, py::const_);
-            auto getZ = py::overload_cast<>(&Point<T, 3>::getZ, py::const_);
+            auto getX = nb::overload_cast<>(&Point<T, 3>::getX, nb::const_);
+            auto getY = nb::overload_cast<>(&Point<T, 3>::getY, nb::const_);
+            auto getZ = nb::overload_cast<>(&Point<T, 3>::getZ, nb::const_);
             cls.def("getX", getX);
             cls.def("getY", getY);
             cls.def("getZ", getZ);
             cls.def("setX", &Point<T, 3>::setX);
             cls.def("setY", &Point<T, 3>::setY);
             cls.def("setZ", &Point<T, 3>::setZ);
-            cls.def_property("x", getX, &Point<T, 3>::setX);
-            cls.def_property("y", getY, &Point<T, 3>::setY);
-            cls.def_property("z", getZ, &Point<T, 3>::setZ);
+            cls.def_prop_rw("x", getX, &Point<T, 3>::setX);
+            cls.def_prop_rw("y", getY, &Point<T, 3>::setY);
+            cls.def_prop_rw("z", getZ, &Point<T, 3>::setZ);
         }
     );
 }
 
 // Declare mixed-type and type-overloaded operators for Point with dimension
-// N for both int and double. Because pybind11 tries operators (like any
+// N for both int and double. Because nanobind tries operators (like any
 // overload) `in order', int has to come before double in any overloaded
 // operators that dispatch on a scalar, and hence they have to be defined here
 // instead of declareExtent.
@@ -461,27 +482,27 @@ void declarePointOperators(cpputils::python::WrapperCollection & wrappers,
             clsI.def("__iadd__", [](Point<int, N> &self, Extent<int, N> const &other) {
                 self += other;
                 return &self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__iadd__", [](Point<double, N> &self, Extent<int, N> const &other) {
                 self += other;
                 return &self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__iadd__", [](Point<double, N> &self, Extent<double, N> const &other) {
                 self += other;
                 return &self;
-            });
+            }, nb::rv_policy::none);
             clsI.def("__isub__", [](Point<int, N> &self, Extent<int, N> const &other) {
                 self -= other;
                 return &self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__isub__", [](Point<double, N> &self, Extent<int, N> const &other) {
                 self -= other;
                 return &self;
-            });
+            }, nb::rv_policy::none);
             clsD.def("__isub__", [](Point<double, N> &self, Extent<double, N> const &other) {
                 self -= other;
                 return &self;
-            });
+            }, nb::rv_policy::none);
         }
     );
 }
