@@ -19,9 +19,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
-#include "pybind11/numpy.h"
+#include "nanobind/nanobind.h"
+#include "nanobind/stl/tuple.h"
+#include "nanobind/stl/vector.h"
+#include "nanobind/ndarray.h"
+#include "lsst/sphgeom/python.h"
 
 #include <cmath>
 #include <memory>
@@ -34,14 +36,15 @@
 #include "lsst/geom/Point.h"
 #include "lsst/geom/SpherePoint.h"
 
-namespace py = pybind11;
-using namespace py::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace lsst {
 namespace geom {
 
 namespace {
 
+	
 double toUnitX(double longitude, double latitude) {
     return std::cos(longitude) * std::cos(latitude);
 }
@@ -57,7 +60,7 @@ double toUnitZ(double longitude, double latitude) {
 } // anonymous
 
 
-using PySpherePoint = py::class_<SpherePoint, std::shared_ptr<SpherePoint>>;
+using PySpherePoint = nb::class_<SpherePoint>;
 
 void wrapSpherePoint(cpputils::python::WrapperCollection & wrappers) {
     wrappers.addSignatureDependency("lsst.sphgeom");
@@ -65,23 +68,23 @@ void wrapSpherePoint(cpputils::python::WrapperCollection & wrappers) {
         PySpherePoint(wrappers.module, "SpherePoint"),
         [](auto & mod, auto & cls) mutable {
             /* Constructors */
-            cls.def(py::init<>());
-            cls.def(py::init<Angle const &, Angle const &>(), "longitude"_a, "latitude"_a);
-            cls.def(py::init<double, double, AngleUnit>(), "longitude"_a, "latitude"_a, "units"_a);
-            cls.def(py::init<sphgeom::Vector3d const &>(), "vector"_a);
-            cls.def(py::init<sphgeom::UnitVector3d const &>(), "unitVector"_a);
-            cls.def(py::init<sphgeom::LonLat const &>(), "lonLat"_a);
-            cls.def(py::init<SpherePoint const &>(), "other"_a);
-            py::implicitly_convertible<SpherePoint, sphgeom::LonLat>();
-            py::implicitly_convertible<sphgeom::LonLat, SpherePoint>();
+            cls.def(nb::init<>());
+            cls.def(nb::init<Angle const &, Angle const &>(), "longitude"_a, "latitude"_a);
+            cls.def(nb::init<double, double, AngleUnit>(), "longitude"_a, "latitude"_a, "units"_a);
+            cls.def(nb::init<sphgeom::Vector3d const &>(), "vector"_a);
+            cls.def(nb::init<sphgeom::UnitVector3d const &>(), "unitVector"_a);
+            cls.def(nb::init<sphgeom::LonLat const &>(), "lonLat"_a);
+            cls.def(nb::init<SpherePoint const &>(), "other"_a);
+            nb::implicitly_convertible<SpherePoint, sphgeom::LonLat>();
+            nb::implicitly_convertible<sphgeom::LonLat, SpherePoint>();
 
             /* Operators */
             cls.def("__getitem__",
                     [](SpherePoint const &self, std::ptrdiff_t i) {
                         return self[cpputils::python::cppIndex(2, i)];
                     });
-            cls.def("__eq__", &SpherePoint::operator==, py::is_operator());
-            cls.def("__ne__", &SpherePoint::operator!=, py::is_operator());
+            cls.def("__eq__", &SpherePoint::operator==, nb::is_operator());
+            cls.def("__ne__", &SpherePoint::operator!=, nb::is_operator());
 
             /* Members */
             cls.def("getLongitude", &SpherePoint::getLongitude);
@@ -100,8 +103,8 @@ void wrapSpherePoint(cpputils::python::WrapperCollection & wrappers) {
             cpputils::python::addOutputOp(cls, "__str__");
             cls.def("__len__", [](SpherePoint const &) { return 2; });
             cls.def("__reduce__", [cls](SpherePoint const &self) {
-                return py::make_tuple(cls, py::make_tuple(py::cast(self.getLongitude()),
-                                                          py::cast(self.getLatitude())));
+                return nb::make_tuple(cls, nb::make_tuple(nb::cast(self.getLongitude()),
+                                                          nb::cast(self.getLatitude())));
             });
 
 
@@ -109,9 +112,9 @@ void wrapSpherePoint(cpputils::python::WrapperCollection & wrappers) {
             mod.def("averageSpherePoint", averageSpherePoint);
 
             // Used only by pure-Python extension toUnitXYZ in _SpherePoint.py.
-            mod.def("_toUnitX", py::vectorize(&toUnitX), "longitude"_a, "latitude"_a);
-            mod.def("_toUnitY", py::vectorize(&toUnitY), "longitude"_a, "latitude"_a);
-            mod.def("_toUnitZ", py::vectorize(&toUnitZ), "longitude"_a, "latitude"_a);
+            mod.def("_toUnitX", nb::vectorize(&toUnitX), "longitude"_a, "latitude"_a);
+            mod.def("_toUnitY", nb::vectorize(&toUnitY), "longitude"_a, "latitude"_a);
+            mod.def("_toUnitZ", nb::vectorize(&toUnitZ), "longitude"_a, "latitude"_a);
         }
     );
 }

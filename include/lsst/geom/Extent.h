@@ -352,7 +352,7 @@ public:
 template <typename T>
 template <typename U>
 Extent<T, 2>::Extent(Extent<U, 2> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>) {
-    static_assert((!std::is_same<T, U>::value && std::is_integral<U>::value),
+    static_assert((!std::is_same_v<T, U> && std::is_arithmetic_v<U>),
                   "can only construct from Extent of different but integral type");
     this->setX(static_cast<T>(other.getX()));
     this->setY(static_cast<T>(other.getY()));
@@ -361,7 +361,7 @@ Extent<T, 2>::Extent(Extent<U, 2> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<
 template <typename T>
 template <typename U>
 Extent<T, 2>::Extent(Point<U, 2> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>) {
-    static_assert((!std::is_same<T, U>::value && std::is_integral<U>::value),
+    static_assert((!std::is_same_v<T, U> && std::is_arithmetic_v<U>),
                   "can only construct from Extent of different but integral type");
     this->setX(static_cast<T>(other.getX()));
     this->setY(static_cast<T>(other.getY()));
@@ -371,7 +371,7 @@ Extent<T, 2>::Extent(Point<U, 2> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T
 template <typename T>
 template <typename U>
 Extent<T, 3>::Extent(Extent<U, 3> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>) {
-    static_assert((!std::is_same<T, U>::value && std::is_integral<U>::value),
+    static_assert((!std::is_same_v<T, U> && std::is_arithmetic_v<U>),
                   "can only construct from Extent of different but integral type");
     this->setX(static_cast<T>(other.getX()));
     this->setY(static_cast<T>(other.getY()));
@@ -382,7 +382,7 @@ Extent<T, 3>::Extent(Extent<U, 3> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<
 template <typename T>
 template <typename U>
 Extent<T, 3>::Extent(Point<U, 3> const &other) noexcept(IS_NOTHROW_CONVERTIBLE<T, U>) {
-    static_assert((!std::is_same<T, U>::value && std::is_integral<U>::value),
+    static_assert((!std::is_same_v<T, U> && std::is_arithmetic_v<U>),
                   "can only construct from Extent of different but integral type");
     this->setX(static_cast<T>(other.getX()));
     this->setY(static_cast<T>(other.getY()));

@@ -19,12 +19,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "pybind11/pybind11.h"
-#include "pybind11/eigen.h"
-#include "pybind11/stl.h"
-#include "pybind11/numpy.h"
+#include "nanobind/nanobind.h"
+#include "nanobind/eigen/dense.h"
+#include "nanobind/stl/pair.h"
+#include "nanobind/stl/tuple.h"
+#include "nanobind/stl/string.h"
+#include "nanobind/ndarray.h"
+#include "lsst/sphgeom/python.h"
 
-#include "ndarray/pybind11.h"
+#include "ndarray/nanobind.h"
 
 #include "lsst/cpputils/python.h"
 
@@ -32,50 +35,50 @@
 #include "lsst/geom/Point.h"
 #include "lsst/geom/LinearTransform.h"
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nanobind::literals;
 
 namespace lsst {
 namespace geom {
 
 void wrapLinearTransform(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
-        py::class_<LinearTransform, std::shared_ptr<LinearTransform>>(wrappers.module, "LinearTransform"),
+        nb::class_<LinearTransform>(wrappers.module, "LinearTransform"),
         [](auto & mod, auto & cls) {
 
             // Parameters enum is really only used as integer constants.
-            cls.attr("XX") = py::cast(int(LinearTransform::Parameters::XX));
-            cls.attr("YX") = py::cast(int(LinearTransform::Parameters::YX));
-            cls.attr("XY") = py::cast(int(LinearTransform::Parameters::XY));
-            cls.attr("YY") = py::cast(int(LinearTransform::Parameters::YY));
+            cls.attr("XX") = nb::cast(int(LinearTransform::Parameters::XX));
+            cls.attr("YX") = nb::cast(int(LinearTransform::Parameters::YX));
+            cls.attr("XY") = nb::cast(int(LinearTransform::Parameters::XY));
+            cls.attr("YY") = nb::cast(int(LinearTransform::Parameters::YY));
 
             /* Constructors */
-            cls.def(py::init<>());
-            cls.def(py::init<LinearTransform::Matrix const &>(), "matrix"_a);
+            cls.def(nb::init<>());
+            cls.def(nb::init<LinearTransform::Matrix const &>(), "matrix"_a);
 
             /* Operators */
             cls.def("__call__",
-                    py::overload_cast<Point2D const &>(&LinearTransform::operator(), py::const_));
+                    nb::overload_cast<Point2D const &>(&LinearTransform::operator(), nb::const_));
             cls.def("__call__",
-                    py::overload_cast<Extent2D const &>(&LinearTransform::operator(), py::const_));
+                    nb::overload_cast<Extent2D const &>(&LinearTransform::operator(), nb::const_));
             cls.def("__call__",
-                    // We use pybind11's wrappers for the Python C API to
+                    // We use nanobind's wrappers for the Python C API to
                     // delegate to other wrapped methods because:
                     //  - defining this in pure Python is tricky because it's
                     //    an overload, not a standalone method;
                     //  - we'd rather not add a new pure-Python file just for
                     //    this;
-                    //  - using py::vectorize internal to the method would
+                    //  - using nb::vectorize internal to the method would
                     //    involve defining a new internal callable every time
                     //    this method is called.
                     // The other viable alternative would be to define
-                    // applyX and applyY as Python callables with py::vectorize
+                    // applyX and applyY as Python callables with nb::vectorize
                     // outside the lambda as C++ local variables, and then
                     // capture them by value in the lambda.  This just seems
                     // slightly cleaner, as it's closer to how one would
                     // implement this in pure Python, if it wasn't an overload.
-                    [](py::object self, py::object x, py::object y) {
-                        return py::make_tuple(self.attr("applyX")(x, y),
+                    [](nb::object self, nb::object x, nb::object y) {
+                        return nb::make_tuple(self.attr("applyX")(x, y),
                                               self.attr("applyY")(x, y));
                     },
                     "x"_a, "y"_a);
@@ -86,29 +89,29 @@ void wrapLinearTransform(cpputils::python::WrapperCollection & wrappers) {
                 auto col = cpputils::python::cppIndex(2, i.second);
                 return self.getMatrix()(row, col);
             });
-            cls.def("__mul__", &LinearTransform::operator*, py::is_operator());
-            cls.def("__add__", &LinearTransform::operator+, py::is_operator());
-            cls.def("__sub__", &LinearTransform::operator-, py::is_operator());
+            cls.def("__mul__", &LinearTransform::operator*, nb::is_operator());
+            cls.def("__add__", &LinearTransform::operator+, nb::is_operator());
+            cls.def("__sub__", &LinearTransform::operator-, nb::is_operator());
             cls.def("__iadd__", &LinearTransform::operator+=);
             cls.def("__isub__", &LinearTransform::operator-=);
 
             /* Members */
             cls.def_static("makeScaling",
-                           py::overload_cast<double>(&LinearTransform::makeScaling),
+                           nb::overload_cast<double>(&LinearTransform::makeScaling),
                            "scale"_a);
             cls.def_static("makeScaling",
-                           py::overload_cast<double, double>(&LinearTransform::makeScaling));
+                           nb::overload_cast<double, double>(&LinearTransform::makeScaling));
             cls.def_static("makeRotation",
-                           py::overload_cast<Angle>(LinearTransform::makeRotation),
+                           nb::overload_cast<Angle>(LinearTransform::makeRotation),
                            "angle"_a);
             cls.def("getParameterVector", &LinearTransform::getParameterVector);
             cls.def("getMatrix",
-                    py::overload_cast<>(& LinearTransform::getMatrix, py::const_));
+                    nb::overload_cast<>(& LinearTransform::getMatrix, nb::const_));
             cls.def("inverted", &LinearTransform::inverted);
             cls.def("computeDeterminant", &LinearTransform::computeDeterminant);
             cls.def("isIdentity", &LinearTransform::isIdentity);
-            cls.def("applyX", py::vectorize(&LinearTransform::applyX), "x"_a, "y"_a);
-            cls.def("applyY", py::vectorize(&LinearTransform::applyY), "x"_a, "y"_a);
+            cls.def("applyX", nb::vectorize(&LinearTransform::applyX), "x"_a, "y"_a);
+            cls.def("applyY", nb::vectorize(&LinearTransform::applyY), "x"_a, "y"_a);
 
             cls.def("set",
                     [](LinearTransform &self, double xx, double yx, double xy, double yy) {
@@ -120,13 +123,13 @@ void wrapLinearTransform(cpputils::python::WrapperCollection & wrappers) {
                     "xx"_a, "yx"_a, "xy"_a, "yy"_a);
 
             cls.def("__str__", [](LinearTransform const &self) {
-                return py::str(py::cast(self.getMatrix()));
+                return nb::str(nb::cast(self.getMatrix()));
             });
             cls.def("__repr__", [](LinearTransform const &self) {
-                return py::str("LinearTransform(\n{}\n)").format(py::cast(self.getMatrix()));
+                return nb::str("LinearTransform(\n{}\n)").format(nb::cast(self.getMatrix()));
             });
             cls.def("__reduce__", [cls](LinearTransform const &self) {
-                return py::make_tuple(cls, py::make_tuple(py::cast(self.getMatrix())));
+                return nb::make_tuple(cls, nb::make_tuple(nb::cast(self.getMatrix())));
             });
         }
     );

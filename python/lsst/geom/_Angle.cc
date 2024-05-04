@@ -19,34 +19,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/cpputils/python.h"
 
 #include "lsst/geom/Angle.h"
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace lsst {
 namespace geom {
 
-using PyAngle = py::class_<Angle>;
-using PyAngleUnit = py::class_<AngleUnit>;
+using PyAngle = nb::class_<Angle>;
+using PyAngleUnit = nb::class_<AngleUnit>;
 
 namespace {
 
 template <typename OtherT>
 void declareAngleComparisonOperators(PyAngle& cls) {
     cls.def("__eq__", [](Angle const& self, OtherT const& other) { return self == other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ne__", [](Angle const& self, OtherT const& other) { return self != other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__le__", [](Angle const& self, OtherT const& other) { return self <= other; },
-            py::is_operator());
+            nb::is_operator());
     cls.def("__ge__", [](Angle const& self, OtherT const& other) { return self >= other; },
-            py::is_operator());
-    cls.def("__lt__", [](Angle const& self, OtherT const& other) { return self < other; }, py::is_operator());
-    cls.def("__gt__", [](Angle const& self, OtherT const& other) { return self > other; }, py::is_operator());
+            nb::is_operator());
+    cls.def("__lt__", [](Angle const& self, OtherT const& other) { return self < other; }, nb::is_operator());
+    cls.def("__gt__", [](Angle const& self, OtherT const& other) { return self > other; }, nb::is_operator());
 }
 
 } // anonymous
@@ -56,65 +56,65 @@ void wrapAngle(cpputils::python::WrapperCollection & wrappers) {
         PyAngleUnit(wrappers.module, "AngleUnit"),
         [](auto & mod, auto & cls) mutable {
             cls.def("__eq__", [](AngleUnit const& self, AngleUnit const& other) { return self == other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__ne__", [](AngleUnit const& self, AngleUnit const& other) { return !(self == other); },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("_mul", [](AngleUnit const& self, double other) { return other * self; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("_rmul", [](AngleUnit const& self, double other) { return other * self; },
-                    py::is_operator());
-            mod.attr("radians") = py::cast(radians);
-            mod.attr("degrees") = py::cast(degrees);
-            mod.attr("hours") = py::cast(hours);
-            mod.attr("arcminutes") = py::cast(arcminutes);
-            mod.attr("arcseconds") = py::cast(arcseconds);
-            mod.attr("milliarcseconds") = py::cast(milliarcseconds);
+                    nb::is_operator());
+            mod.attr("radians") = nb::cast(radians);
+            mod.attr("degrees") = nb::cast(degrees);
+            mod.attr("hours") = nb::cast(hours);
+            mod.attr("arcminutes") = nb::cast(arcminutes);
+            mod.attr("arcseconds") = nb::cast(arcseconds);
+            mod.attr("milliarcseconds") = nb::cast(milliarcseconds);
         }
     );
 
     wrappers.wrapType(
         PyAngle(wrappers.module, "Angle"),
         [](auto & mod, auto & cls) mutable {
-            cls.def(py::init<double, AngleUnit>(), py::arg("val"), py::arg("units") = radians);
-            cls.def(py::init<>());
+            cls.def(nb::init<double, AngleUnit>(), nb::arg("val"), nb::arg("units") = radians);
+            cls.def(nb::init<>());
             declareAngleComparisonOperators<Angle>(cls);
             declareAngleComparisonOperators<double>(cls);
             declareAngleComparisonOperators<int>(cls);
             cls.def("__mul__", [](Angle const& self, double other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__mul__", [](Angle const& self, int other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__rmul__", [](Angle const& self, double other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__rmul__", [](Angle const& self, int other) { return self * other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__imul__", [](Angle& self, double other) { return self *= other; });
             cls.def("__imul__", [](Angle& self, int other) { return self *= other; });
             cls.def("__add__", [](Angle const& self, Angle const& other) { return self + other; },
-                    py::is_operator());
+                    nb::is_operator());
             cls.def("__sub__", [](Angle const& self, Angle const& other) { return self - other; },
-                    py::is_operator());
-            cls.def("__neg__", [](Angle const& self) { return -self; }, py::is_operator());
+                    nb::is_operator());
+            cls.def("__neg__", [](Angle const& self) { return -self; }, nb::is_operator());
             cls.def("__iadd__", [](Angle& self, Angle const& other) { return self += other; });
             cls.def("__isub__", [](Angle& self, Angle const& other) { return self -= other; });
             cls.def("__truediv__", [](Angle const& self, double other) { return self / other; },
-                    py::is_operator());
+                    nb::is_operator());
             // Without an explicit wrapper, Python lets Angle / Angle -> Angle
             cls.def("__truediv__", [](Angle const& self, Angle const& other) {
-                throw py::type_error("unsupported operand type(s) for /: 'Angle' and 'Angle'");
+                throw nb::type_error("unsupported operand type(s) for /: 'Angle' and 'Angle'");
             });
             cls.def("__float__", &Angle::operator double);
             cls.def("__abs__", [](Angle const& self) { return std::abs(self.asRadians()) * radians; });
 
             cls.def("__reduce__", [cls](Angle const& self) {
-                return py::make_tuple(cls, py::make_tuple(py::cast(self.asRadians())));
+                return nb::make_tuple(cls, nb::make_tuple(nb::cast(self.asRadians())));
             });
             cpputils::python::addOutputOp(cls, "__str__");
             cls.def("__repr__", [](Angle const & self) {
                 if (std::isfinite(self.asDegrees())) {
-                    return py::str("Angle({:0.17g}, degrees)").format(self.asDegrees());
+                    return nb::str("Angle({:0.17g}, degrees)").format(self.asDegrees());
                 } else {
-                    return py::str("Angle(float('{}'), degrees)").format(self.asDegrees());
+                    return nb::str("Angle(float('{}'), degrees)").format(self.asDegrees());
                 }
             });
             cls.def("asAngularUnits", &Angle::asAngularUnits);
@@ -130,20 +130,20 @@ void wrapAngle(cpputils::python::WrapperCollection & wrappers) {
             cls.def("separation", &Angle::separation);
             mod.def("isAngle", isAngle<Angle>);
             mod.def("isAngle", isAngle<double>);
-            py::implicitly_convertible<Angle, sphgeom::Angle>();
-            py::implicitly_convertible<sphgeom::Angle, Angle>();
+            nb::implicitly_convertible<Angle, sphgeom::Angle>();
+            nb::implicitly_convertible<sphgeom::Angle, Angle>();
         }
     );
 
     wrappers.wrap(
         [](auto & mod) mutable {
-            mod.attr("PI") = py::float_(PI);
-            mod.attr("TWOPI") = py::float_(TWOPI);
-            mod.attr("HALFPI") = py::float_(HALFPI);
-            mod.attr("ONE_OVER_PI") = py::float_(ONE_OVER_PI);
-            mod.attr("SQRTPI") = py::float_(SQRTPI);
-            mod.attr("INVSQRTPI") = py::float_(INVSQRTPI);
-            mod.attr("ROOT2") = py::float_(ROOT2);
+            mod.attr("PI") = nb::float_(PI);
+            mod.attr("TWOPI") = nb::float_(TWOPI);
+            mod.attr("HALFPI") = nb::float_(HALFPI);
+            mod.attr("ONE_OVER_PI") = nb::float_(ONE_OVER_PI);
+            mod.attr("SQRTPI") = nb::float_(SQRTPI);
+            mod.attr("INVSQRTPI") = nb::float_(INVSQRTPI);
+            mod.attr("ROOT2") = nb::float_(ROOT2);
             mod.def("degToRad", degToRad);
             mod.def("radToDeg", radToDeg);
             mod.def("radToArcsec", radToArcsec);

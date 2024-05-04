@@ -19,13 +19,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "pybind11/pybind11.h"
+#include "nanobind/nanobind.h"
 
 #include "lsst/cpputils/python.h"
 
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nanobind::literals;
 
 namespace lsst {
 namespace geom {
@@ -40,7 +40,7 @@ void wrapBox(WrapperCollection & wrappers);
 void wrapLinearTransform(WrapperCollection & wrappers);
 void wrapAffineTransform(WrapperCollection & wrappers);
 
-PYBIND11_MODULE(_geom, mod) {
+NB_MODULE(_geom, mod) {
     WrapperCollection w(mod, "lsst.geom");
     wrapAngle(w);
     wrapCoordinates(w);
