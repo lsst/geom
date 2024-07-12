@@ -296,7 +296,7 @@ class OperatorTestCase(lsst.utils.tests.TestCase):
         else:
             check = op(np.array(v1), np.array(v2))
             result = op(v1, v2)
-            if type(result) != expected:
+            if type(result) is not expected:
                 self.fail("%s(%s, %s): expected %s, got %s" %
                           (op.__name__, lhs.__name__, rhs.__name__,
                            expected.__name__, type(result).__name__))
