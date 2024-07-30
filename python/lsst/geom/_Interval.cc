@@ -25,7 +25,7 @@
 #include "ndarray/pybind11.h"
 
 #include "lsst/geom/Interval.h"
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -94,7 +94,7 @@ void declareCommonIntervalInterface(PyClass &cls) {
     cls.def("expandedTo", py::overload_cast<T const &>(&T::expandedTo, py::const_));
     cls.def("clippedTo", &T::clippedTo);
     cls.def("__str__", &T::toString);
-    utils::python::addOutputOp(cls, "__repr__");
+    cpputils::python::addOutputOp(cls, "__repr__");
     cls.def("__reduce__", [cls](IntervalD const &self) {
         return py::make_tuple(cls, make_tuple(py::cast(self.getMin()), py::cast(self.getMax())));
     });
@@ -102,7 +102,7 @@ void declareCommonIntervalInterface(PyClass &cls) {
 
 }  // namespace
 
-void wrapInterval(utils::python::WrapperCollection &wrappers) {
+void wrapInterval(cpputils::python::WrapperCollection &wrappers) {
     wrappers.wrapType(py::class_<IntervalI, std::shared_ptr<IntervalI>>(wrappers.module, "IntervalI"),
                       [](auto &mod, auto &cls) {
                           py::enum_<IntervalI::EdgeHandlingEnum>(cls, "EdgeHandlingEnum")

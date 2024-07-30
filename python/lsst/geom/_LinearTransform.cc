@@ -26,7 +26,7 @@
 
 #include "ndarray/pybind11.h"
 
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 #include "lsst/geom/Extent.h"
 #include "lsst/geom/Point.h"
@@ -38,7 +38,7 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace geom {
 
-void wrapLinearTransform(utils::python::WrapperCollection & wrappers) {
+void wrapLinearTransform(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
         py::class_<LinearTransform, std::shared_ptr<LinearTransform>>(wrappers.module, "LinearTransform"),
         [](auto & mod, auto & cls) {
@@ -80,10 +80,10 @@ void wrapLinearTransform(utils::python::WrapperCollection & wrappers) {
                     },
                     "x"_a, "y"_a);
             cls.def("__getitem__",
-                    [](LinearTransform const &self, int i) { return self[utils::python::cppIndex(4, i)]; });
+                    [](LinearTransform const &self, int i) { return self[cpputils::python::cppIndex(4, i)]; });
             cls.def("__getitem__", [](LinearTransform const &self, std::pair<int, int> i) {
-                auto row = utils::python::cppIndex(2, i.first);
-                auto col = utils::python::cppIndex(2, i.second);
+                auto row = cpputils::python::cppIndex(2, i.first);
+                auto col = cpputils::python::cppIndex(2, i.second);
                 return self.getMatrix()(row, col);
             });
             cls.def("__mul__", &LinearTransform::operator*, py::is_operator());

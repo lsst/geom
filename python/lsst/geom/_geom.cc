@@ -21,7 +21,7 @@
 
 #include "pybind11/pybind11.h"
 
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 
 namespace py = pybind11;
@@ -30,7 +30,7 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace geom {
 
-using utils::python::WrapperCollection;
+using cpputils::python::WrapperCollection;
 
 void wrapAngle(WrapperCollection & wrappers);
 void wrapCoordinates(WrapperCollection & wrappers);

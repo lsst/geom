@@ -26,7 +26,7 @@
 #include "ndarray/pybind11.h"
 
 #include "lsst/geom/AffineTransform.h"
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -34,7 +34,7 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace geom {
 
-void wrapAffineTransform(utils::python::WrapperCollection & wrappers) {
+void wrapAffineTransform(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
         py::class_<AffineTransform, std::shared_ptr<AffineTransform>>(wrappers.module, "AffineTransform"),
         [](auto & mod, auto & cls) mutable {

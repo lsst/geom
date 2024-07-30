@@ -24,7 +24,7 @@
 
 #include "boost/test/unit_test.hpp"
 
-#include "lsst/utils/tests.h"
+#include "lsst/cpputils/tests.h"
 
 #include "lsst/geom/Box.h"
 
@@ -40,9 +40,9 @@ BOOST_AUTO_TEST_CASE(Box2IHash) {
     using Int = Box2I::Element;
     using Point = Box2I::Point;
 
-    utils::assertValidHash<Box2I>();
-    utils::assertHashesEqual(Box2I(Point(0, 0), Point(24, 200)), Box2I(Point(0, 0), Extent2I(25, 201)));
-    utils::assertHashesEqual(Box2I(), Box2I(Point(24, 200), Point(0, 0), false));
+    cpputils::assertValidHash<Box2I>();
+    cpputils::assertHashesEqual(Box2I(Point(0, 0), Point(24, 200)), Box2I(Point(0, 0), Extent2I(25, 201)));
+    cpputils::assertHashesEqual(Box2I(), Box2I(Point(24, 200), Point(0, 0), false));
 }
 
 BOOST_AUTO_TEST_CASE(Box2DHash) {
@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE(Box2DHash) {
     using Point = Box2D::Point;
     static const Real nan = std::numeric_limits<Real>::quiet_NaN();
 
-    utils::assertValidHash<Box2D>();
-    utils::assertHashesEqual(Box2D(Point(0, 0), Point(24, 20.5)), Box2D(Point(0, 0), Extent2D(24, 20.5)));
-    utils::assertHashesEqual(Box2D(), Box2D(Point(24, 20.5), Point(0, 0), false));
-    utils::assertHashesEqual(Box2D(), Box2D(Point(nan), Point(42.0, 52.0)));
+    cpputils::assertValidHash<Box2D>();
+    cpputils::assertHashesEqual(Box2D(Point(0, 0), Point(24, 20.5)), Box2D(Point(0, 0), Extent2D(24, 20.5)));
+    cpputils::assertHashesEqual(Box2D(), Box2D(Point(24, 20.5), Point(0, 0), false));
+    cpputils::assertHashesEqual(Box2D(), Box2D(Point(nan), Point(42.0, 52.0)));
 }
 
 }  // namespace geom

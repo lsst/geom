@@ -24,7 +24,7 @@
 #include "pybind11/numpy.h"
 
 #include "lsst/geom/Box.h"
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -32,7 +32,7 @@ using namespace py::literals;
 namespace lsst {
 namespace geom {
 
-void wrapBox(utils::python::WrapperCollection & wrappers) {
+void wrapBox(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
         py::class_<Box2I, std::shared_ptr<Box2I>>(wrappers.module, "Box2I"),
         [](auto & mod, auto & cls) mutable {

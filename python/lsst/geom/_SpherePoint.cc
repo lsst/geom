@@ -26,7 +26,7 @@
 #include <cmath>
 #include <memory>
 
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 #include "lsst/sphgeom/UnitVector3d.h"
 #include "lsst/sphgeom/Vector3d.h"
 #include "lsst/sphgeom/LonLat.h"
@@ -59,7 +59,7 @@ double toUnitZ(double longitude, double latitude) {
 
 using PySpherePoint = py::class_<SpherePoint, std::shared_ptr<SpherePoint>>;
 
-void wrapSpherePoint(utils::python::WrapperCollection & wrappers) {
+void wrapSpherePoint(cpputils::python::WrapperCollection & wrappers) {
     wrappers.addSignatureDependency("lsst.sphgeom");
     wrappers.wrapType(
         PySpherePoint(wrappers.module, "SpherePoint"),
@@ -78,7 +78,7 @@ void wrapSpherePoint(utils::python::WrapperCollection & wrappers) {
             /* Operators */
             cls.def("__getitem__",
                     [](SpherePoint const &self, std::ptrdiff_t i) {
-                        return self[utils::python::cppIndex(2, i)];
+                        return self[cpputils::python::cppIndex(2, i)];
                     });
             cls.def("__eq__", &SpherePoint::operator==, py::is_operator());
             cls.def("__ne__", &SpherePoint::operator!=, py::is_operator());
@@ -97,7 +97,7 @@ void wrapSpherePoint(utils::python::WrapperCollection & wrappers) {
             cls.def("rotated", &SpherePoint::rotated, "axis"_a, "amount"_a);
             cls.def("offset", &SpherePoint::offset, "bearing"_a, "amount"_a);
             cls.def("getTangentPlaneOffset", &SpherePoint::getTangentPlaneOffset, "other"_a);
-            utils::python::addOutputOp(cls, "__str__");
+            cpputils::python::addOutputOp(cls, "__str__");
             cls.def("__len__", [](SpherePoint const &) { return 2; });
             cls.def("__reduce__", [cls](SpherePoint const &self) {
                 return py::make_tuple(cls, py::make_tuple(py::cast(self.getLongitude()),

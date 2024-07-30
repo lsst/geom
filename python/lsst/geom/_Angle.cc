@@ -21,7 +21,7 @@
 
 #include "pybind11/pybind11.h"
 
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 #include "lsst/geom/Angle.h"
 
@@ -51,7 +51,7 @@ void declareAngleComparisonOperators(PyAngle& cls) {
 
 } // anonymous
 
-void wrapAngle(utils::python::WrapperCollection & wrappers) {
+void wrapAngle(cpputils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
         PyAngleUnit(wrappers.module, "AngleUnit"),
         [](auto & mod, auto & cls) mutable {
@@ -109,7 +109,7 @@ void wrapAngle(utils::python::WrapperCollection & wrappers) {
             cls.def("__reduce__", [cls](Angle const& self) {
                 return py::make_tuple(cls, py::make_tuple(py::cast(self.asRadians())));
             });
-            utils::python::addOutputOp(cls, "__str__");
+            cpputils::python::addOutputOp(cls, "__str__");
             cls.def("__repr__", [](Angle const & self) {
                 if (std::isfinite(self.asDegrees())) {
                     return py::str("Angle({:0.17g}, degrees)").format(self.asDegrees());

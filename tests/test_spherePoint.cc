@@ -24,7 +24,7 @@
 
 #include "boost/test/unit_test.hpp"
 
-#include "lsst/utils/tests.h"
+#include "lsst/cpputils/tests.h"
 
 #include "lsst/sphgeom/Vector3d.h"
 #include "lsst/geom/SpherePoint.h"
@@ -129,11 +129,11 @@ BOOST_AUTO_TEST_CASE(getItemError) {
 // TODO: add a test for propagation of ostream errors
 
 BOOST_AUTO_TEST_CASE(Hash) {
-    utils::assertValidHash<SpherePoint>();
+    cpputils::assertValidHash<SpherePoint>();
 
-    utils::assertHashesEqual(SpherePoint(0 * degrees, -24 * degrees),
+    cpputils::assertHashesEqual(SpherePoint(0 * degrees, -24 * degrees),
                              SpherePoint(0 * degrees, -24 * degrees));
-    utils::assertHashesEqual(SpherePoint(HALFPI * radians, 0.0 * radians),
+    cpputils::assertHashesEqual(SpherePoint(HALFPI * radians, 0.0 * radians),
                              SpherePoint(sphgeom::Vector3d(0, 1, 0)));
 }
 

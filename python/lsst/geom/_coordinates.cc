@@ -27,7 +27,7 @@
 #include "lsst/geom/Extent.h"
 #include "lsst/geom/CoordinateBase.h"
 #include "lsst/geom/CoordinateExpr.h"
-#include "lsst/utils/python.h"
+#include "lsst/cpputils/python.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -55,16 +55,16 @@ template <typename T, int N>
 using PyPoint = py::class_<Point<T, N>, PointBase<T, N>>;
 
 template <typename Derived, typename T, int N>
-void declareCoordinateBase(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+void declareCoordinateBase(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "CoordinateBase" + suffix;
     wrappers.wrapType(
         PyCoordinateBase<Derived, T, N>(wrappers.module, name.c_str()),
         [](auto & mod, auto & cls) {
             cls.def("__getitem__", [](CoordinateBase<Derived, T, N> &self, int i) -> T {
-                return self[utils::python::cppIndex(N, i)];
+                return self[cpputils::python::cppIndex(N, i)];
             });
             cls.def("__setitem__", [](CoordinateBase<Derived, T, N> &self, int i, T value) {
-                self[utils::python::cppIndex(N, i)] = value;
+                self[cpputils::python::cppIndex(N, i)] = value;
             });
             cls.def("__len__", [](CoordinateBase<Derived, T, N> &c) -> int { return N; });
         }
@@ -72,7 +72,7 @@ void declareCoordinateBase(utils::python::WrapperCollection & wrappers, std::str
 }
 
 template <int N>
-void declareCoordinateExpr(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+void declareCoordinateExpr(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "CoordinateExpr" + suffix;
     declareCoordinateBase<CoordinateExpr<N>, bool, N>(wrappers, name);
     wrappers.wrapType(
@@ -89,7 +89,7 @@ void declareCoordinateExpr(utils::python::WrapperCollection & wrappers, std::str
 }
 
 template <typename T, int N>
-void declareExtentBase(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+void declareExtentBase(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "ExtentBase" + suffix;
     declareCoordinateBase<Extent<T, N>, T, N>(wrappers, "Extent" + suffix);
     wrappers.wrapType(
@@ -120,7 +120,7 @@ void declareExtentBase(utils::python::WrapperCollection & wrappers, std::string 
 
 // Common functionality for all Extents, including declaring base classes.
 template <typename T, int N>
-PyExtent<T, N> declareExtent(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+PyExtent<T, N> declareExtent(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "Extent" + suffix;
     declareExtentBase<T, N>(wrappers, suffix);
     return wrappers.wrapType(
@@ -177,7 +177,7 @@ PyExtent<T, N> declareExtent(utils::python::WrapperCollection & wrappers, std::s
 
 // Add functionality only found in N=2 Extents (and delgate to declareExtent for the rest)
 template <typename T>
-PyExtent<T, 2> declareExtent2(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+PyExtent<T, 2> declareExtent2(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     return wrappers.wrapType(
         declareExtent<T, 2>(wrappers, std::string("2") + suffix),
         [](auto & mod, auto & cls) {
@@ -201,7 +201,7 @@ PyExtent<T, 2> declareExtent2(utils::python::WrapperCollection & wrappers, std::
 
 // Add functionality only found in N=3 Extents (and delgate to declareExtent for the rest)
 template <typename T>
-PyExtent<T, 3> declareExtent3(utils::python::WrapperCollection & wrappers, const std::string &suffix) {
+PyExtent<T, 3> declareExtent3(cpputils::python::WrapperCollection & wrappers, const std::string &suffix) {
     return wrappers.wrapType(
         declareExtent<T, 3>(wrappers, std::string("3") + suffix),
         [](auto & mod, auto & cls) mutable {
@@ -233,7 +233,7 @@ PyExtent<T, 3> declareExtent3(utils::python::WrapperCollection & wrappers, const
 // operators that dispatch on a scalar, and hence they have to be defined here
 // instead of declareExtent.
 template <int N>
-void declareExtentOperators(utils::python::WrapperCollection & wrapper,
+void declareExtentOperators(cpputils::python::WrapperCollection & wrapper,
                          PyExtent<int, N> &clsI, PyExtent<double, N> &clsD) {
     wrapper.wrap(
         [clsI, clsD](auto & mod) mutable {
@@ -323,7 +323,7 @@ void declareExtentOperators(utils::python::WrapperCollection & wrapper,
 }
 
 template <typename T, int N>
-void declarePointBase(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+void declarePointBase(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "PointBase" + suffix;
     declareCoordinateBase<Point<T, N>, T, N>(wrappers, "Point" + suffix);
     wrappers.wrapType(
@@ -356,7 +356,7 @@ void declarePointBase(utils::python::WrapperCollection & wrappers, std::string c
 
 // Common functionality
 template <typename T, int N>
-PyPoint<T, N> declarePoint(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+PyPoint<T, N> declarePoint(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     static std::string const name = "Point" + suffix;
     declarePointBase<T, N>(wrappers, suffix);
     return wrappers.wrapType(
@@ -398,7 +398,7 @@ PyPoint<T, N> declarePoint(utils::python::WrapperCollection & wrappers, std::str
 
 // Add functionality only found in N=2 Points
 template <typename T>
-PyPoint<T, 2> declarePoint2(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+PyPoint<T, 2> declarePoint2(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     return wrappers.wrapType(
         declarePoint<T, 2>(wrappers, std::string("2") + suffix),
         [](auto & mod, auto & cls) {
@@ -422,7 +422,7 @@ PyPoint<T, 2> declarePoint2(utils::python::WrapperCollection & wrappers, std::st
 
 // Add functionality only found in N=3 Points
 template <typename T>
-PyPoint<T, 3> declarePoint3(utils::python::WrapperCollection & wrappers, std::string const &suffix) {
+PyPoint<T, 3> declarePoint3(cpputils::python::WrapperCollection & wrappers, std::string const &suffix) {
     return wrappers.wrapType(
         declarePoint<T, 3>(wrappers, std::string("3") + suffix),
         [](auto & mod, auto & cls) {
@@ -454,7 +454,7 @@ PyPoint<T, 3> declarePoint3(utils::python::WrapperCollection & wrappers, std::st
 // operators that dispatch on a scalar, and hence they have to be defined here
 // instead of declareExtent.
 template <int N>
-void declarePointOperators(utils::python::WrapperCollection & wrappers,
+void declarePointOperators(cpputils::python::WrapperCollection & wrappers,
                         PyPoint<int, N> &clsI, PyPoint<double, N> &clsD) {
     wrappers.wrap(
         [clsI, clsD](auto & mod) mutable {
@@ -488,7 +488,7 @@ void declarePointOperators(utils::python::WrapperCollection & wrappers,
 
 }  // anonymous
 
-void wrapCoordinates(utils::python::WrapperCollection & wrappers) {
+void wrapCoordinates(cpputils::python::WrapperCollection & wrappers) {
     // Only the interface-level classes are defined here, and these functions
     // call others to define their base classes, since those are never shared.
 

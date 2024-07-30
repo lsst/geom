@@ -21,7 +21,7 @@
 
 #include <cmath>
 
-#include "lsst/utils/hashCombine.h"
+#include "lsst/cpputils/hashCombine.h"
 #include "lsst/geom/Point.h"
 
 namespace lsst {
@@ -117,7 +117,7 @@ CoordinateExpr<N> PointBase<T, N>::ge(Point<T, N> const &other) const noexcept {
 template <typename T, int N>
 std::size_t hash_value(Point<T, N> const &point) noexcept {
     std::size_t result = 0;     // Completely arbitrary seed
-    for (int n = 0; n < N; ++n) result = utils::hashCombine(result, point[n]);
+    for (int n = 0; n < N; ++n) result = cpputils::hashCombine(result, point[n]);
     return result;
 }
 
