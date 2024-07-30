@@ -22,7 +22,7 @@
 #include <cmath>
 #include <limits>
 
-#include "lsst/utils/hashCombine.h"
+#include "lsst/cpputils/hashCombine.h"
 #include "lsst/geom/Box.h"
 
 namespace lsst {
@@ -255,7 +255,7 @@ bool Box2I::operator!=(Box2I const& other) const noexcept {
 
 std::size_t Box2I::hash_value() const noexcept {
     // Completely arbitrary seed
-    return utils::hashCombine(17, _minimum, _dimensions);
+    return cpputils::hashCombine(17, _minimum, _dimensions);
 }
 
 std::vector<Point2I> Box2I::getCorners() const {
@@ -489,7 +489,7 @@ std::size_t Box2D::hash_value() const noexcept {
         return 179;
     } else {
         // Completely arbitrary seed
-        return utils::hashCombine(17, _minimum, _maximum);
+        return cpputils::hashCombine(17, _minimum, _maximum);
     }
 }
 

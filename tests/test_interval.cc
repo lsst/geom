@@ -24,7 +24,7 @@
 
 #include "boost/test/unit_test.hpp"
 
-#include "lsst/utils/tests.h"
+#include "lsst/cpputils/tests.h"
 
 #include "lsst/geom/Interval.h"
 #include "ndarray/arange.h"
@@ -48,15 +48,15 @@ BOOST_AUTO_TEST_CASE(IntervalISlice) {
 }
 
 BOOST_AUTO_TEST_CASE(IntervalIHash) {
-    utils::assertValidHash<IntervalI>();
-    utils::assertHashesEqual(IntervalI::fromMinMax(2, 5), IntervalI::fromMinSize(2, 4));
-    utils::assertHashesEqual(IntervalI(), IntervalI::fromMinMax(1, -1));
+    cpputils::assertValidHash<IntervalI>();
+    cpputils::assertHashesEqual(IntervalI::fromMinMax(2, 5), IntervalI::fromMinSize(2, 4));
+    cpputils::assertHashesEqual(IntervalI(), IntervalI::fromMinMax(1, -1));
 }
 
 BOOST_AUTO_TEST_CASE(IntervalDHash) {
-    utils::assertValidHash<IntervalD>();
-    utils::assertHashesEqual(IntervalD::fromMinMax(-2.0, 2.0), IntervalD::fromMinSize(-2.0, 4.0));
-    utils::assertHashesEqual(IntervalD(), IntervalD::fromMinMax(1.0, -1.0));
+    cpputils::assertValidHash<IntervalD>();
+    cpputils::assertHashesEqual(IntervalD::fromMinMax(-2.0, 2.0), IntervalD::fromMinSize(-2.0, 4.0));
+    cpputils::assertHashesEqual(IntervalD(), IntervalD::fromMinMax(1.0, -1.0));
 }
 
 }  // namespace geom

@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "lsst/utils/hashCombine.h"
+#include "lsst/cpputils/hashCombine.h"
 #include "lsst/geom/CoordinateBase.h"
 #include "lsst/geom/Point.h"
 #include "lsst/geom/Extent.h"
@@ -126,7 +126,7 @@ Extent<int, N> ceil(Extent<double, N> const &input) noexcept {
 template <typename T, int N>
 std::size_t hash_value(Extent<T, N> const &extent) noexcept {
     std::size_t result = 0;     // Completely arbitrary seed
-    for (int n = 0; n < N; ++n) result = utils::hashCombine(result, extent[n]);
+    for (int n = 0; n < N; ++n) result = cpputils::hashCombine(result, extent[n]);
     return result;
 }
 

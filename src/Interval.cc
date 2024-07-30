@@ -25,7 +25,7 @@
 
 #include "boost/format.hpp"
 
-#include "lsst/utils/hashCombine.h"
+#include "lsst/cpputils/hashCombine.h"
 #include "lsst/geom/Interval.h"
 
 namespace lsst {
@@ -198,7 +198,7 @@ bool IntervalI::operator!=(IntervalI const& other) const noexcept { return !(oth
 
 std::size_t IntervalI::hash_value() const noexcept {
     // Completely arbitrary seed
-    return utils::hashCombine(17, _min, _size);
+    return cpputils::hashCombine(17, _min, _size);
 }
 
 std::string IntervalI::toString() const {
@@ -348,7 +348,7 @@ bool IntervalD::operator!=(IntervalD const& other) const noexcept { return !(oth
 
 std::size_t IntervalD::hash_value() const noexcept {
     // Completely arbitrary seed
-    return utils::hashCombine(17, _min, _max);
+    return cpputils::hashCombine(17, _min, _max);
 }
 
 std::string IntervalD::toString() const {

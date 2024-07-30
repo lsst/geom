@@ -26,7 +26,7 @@
 #include "boost/test/unit_test.hpp"
 #pragma clang diagnostic pop
 
-#include "lsst/utils/tests.h"
+#include "lsst/cpputils/tests.h"
 
 #include "lsst/geom/Angle.h"
 
@@ -34,11 +34,11 @@ namespace lsst {
 namespace geom {
 
 BOOST_AUTO_TEST_CASE(Hash) {
-    utils::assertValidHash<Angle>();
-    utils::assertHashesEqual(0.0 * radians, 0.0 * degrees);
+    cpputils::assertValidHash<Angle>();
+    cpputils::assertHashesEqual(0.0 * radians, 0.0 * degrees);
 
-    utils::assertValidHash<AngleUnit>();
-    utils::assertHashesEqual(degrees, AngleUnit(PI / 180.0));
+    cpputils::assertValidHash<AngleUnit>();
+    cpputils::assertHashesEqual(degrees, AngleUnit(PI / 180.0));
 }
 
 }  // namespace geom
