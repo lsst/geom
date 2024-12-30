@@ -447,8 +447,12 @@ PyPoint<T, 3> declarePoint3(cpputils::python::WrapperCollection & wrappers, std:
             /* Member types and enums */
             cls.def_prop_ro_static("dimensions", [](nb::object /* cls */) { return 3; });
             /* Constructors */
-            cls.def(nb::init<int, int, int>(), "x"_a, "y"_a, "z"_a);
-            cls.def(nb::init<double, double, double>(), "x"_a, "y"_a, "z"_a);
+            cls.def("__init__", [](Point<T, 3> *point, int x, int y, int z) {
+                new (point) Point<T, 3>(x, y, z);
+            }, "x"_a, "y"_a, "z"_a);
+            cls.def("__init__", [](Point<T, 3> *point, double x, double y, double z) {
+                new (point) Point<T, 3>(x, y, z);
+            }, "x"_a, "y"_a, "z"_a);
             cls.def("__init__", [](Point<T, 3> *point, nb::tuple arg) {
                 new (point) Point<T, 3>(nb::cast<T>(arg[0]), nb::cast<T>(arg[1]), nb::cast<T>(arg[2]));
             });
