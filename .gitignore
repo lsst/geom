@@ -28,3 +28,4 @@ tests/test_coordinates
 tests/test_spherePoint
 tests/test_interval
 version.py
+python/*.dist-info/
