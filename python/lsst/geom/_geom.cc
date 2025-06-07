@@ -39,6 +39,7 @@ void wrapInterval(WrapperCollection & wrappers);
 void wrapBox(WrapperCollection & wrappers);
 void wrapLinearTransform(WrapperCollection & wrappers);
 void wrapAffineTransform(WrapperCollection & wrappers);
+void wrapSphereTransform(WrapperCollection & wrappers);
 
 PYBIND11_MODULE(_geom, mod) {
     WrapperCollection w(mod, "lsst.geom");
@@ -49,6 +50,7 @@ PYBIND11_MODULE(_geom, mod) {
     wrapBox(w);
     wrapLinearTransform(w);
     wrapAffineTransform(w);
+    wrapSphereTransform(w);
     w.finish();
 }
 
