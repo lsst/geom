@@ -154,7 +154,7 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
             fpMax = geom.Point2D(xmax, ymax)
             if any((fpMax-fpMin).lt(3)):
                 continue  # avoid empty boxes
-            with self.subTest(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax):
+            with self.subTest(xmin=repr(xmin), xmax=repr(xmax), ymin=repr(ymin), ymax=repr(ymax)):
                 fpBox = geom.Box2D(fpMin, fpMax)
                 intBoxBig = geom.Box2I(fpBox, geom.Box2I.EXPAND)
                 fpBoxBig = geom.Box2D(intBoxBig)
@@ -230,10 +230,10 @@ class Box2ITestCase(lsst.utils.tests.TestCase):
             geom.Point2I(-2, 2),
         ]
         for point in inPoints:
-            with self.subTest(point=point):
+            with self.subTest(point=repr(point)):
                 self.assertTrue(box.contains(point))
         for point in outPoints:
-            with self.subTest(point=point):
+            with self.subTest(point=repr(point)):
                 self.assertFalse(box.contains(point))
         inX, inY = zip(*inPoints)
         outX, outY = zip(*outPoints)
@@ -421,10 +421,10 @@ class Box2DTestCase(lsst.utils.tests.TestCase):
             geom.Point2D(-2, 1),
         ]
         for point in inPoints:
-            with self.subTest(point=point):
+            with self.subTest(point=repr(point)):
                 self.assertTrue(box.contains(point))
         for point in outPoints:
-            with self.subTest(point=point):
+            with self.subTest(point=repr(point)):
                 self.assertFalse(box.contains(point))
         inX, inY = zip(*inPoints)
         outX, outY = zip(*outPoints)

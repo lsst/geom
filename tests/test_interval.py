@@ -145,17 +145,17 @@ class IntervalTests:
         self.assertTrue(self.IntervalClass().isEmpty())
         self.assertAllFalse(s.isEmpty() for s in self.intervals.nonempty)
         for interval in self.intervals.empty:
-            with self.subTest(interval=interval):
+            with self.subTest(interval=repr(interval)):
                 self.checkEmptyIntervalInvariants(interval)
 
     def testConstructors(self):
         for i in self.intervals.finite:
-            with self.subTest(i=i):
+            with self.subTest(i=repr(i)):
                 self.assertEqual(i, self.IntervalClass(min=i.min, max=i.max))
                 self.assertEqual(i, self.IntervalClass(min=i.min, size=i.size))
                 self.assertEqual(i, self.IntervalClass(max=i.max, size=i.size))
         for i in self.intervals.infinite:
-            with self.subTest(i=i):
+            with self.subTest(i=repr(i)):
                 self.assertEqual(i, self.IntervalClass(min=i.min, max=i.max))
             with self.assertRaises(InvalidParameterError):
                 self.IntervalClass(min=i.min, size=i.size)
@@ -165,7 +165,7 @@ class IntervalTests:
     def testFromSpannedPoints(self):
         for n1, p1 in enumerate(self.points):
             for n2, p2 in enumerate(self.points):
-                with self.subTest(n1=n1, p1=p1, n2=n2, p2=p2):
+                with self.subTest(n1=repr(n1), p1=repr(p1), n2=repr(n2), p2=repr(p2)):
                     seq = list(self.points[n1:n2+1])
                     # p1 is the overall min and p2 is the overall max because
                     # self.points is sorted.
@@ -179,47 +179,47 @@ class IntervalTests:
     def testContains(self):
         for lhs in self.intervals.nonempty:
             for rhs in self.intervals.nonempty:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertEqual(lhs.contains(rhs), lhs.min <= rhs.min and lhs.max >= rhs.max)
             for rhs in self.intervals.empty:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertTrue(lhs.contains(rhs))
             for rhs in self.points:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertEqual(lhs.contains(rhs), lhs.min <= rhs and lhs.max >= rhs)
             array = np.array(self.points)
             np.testing.assert_array_equal(lhs.contains(array),
                                           np.logical_and(lhs.min <= array, lhs.max >= array))
         for lhs in self.intervals.empty:
             for rhs in self.intervals.nonempty:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertFalse(lhs.contains(rhs))
             for rhs in self.intervals.empty:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertTrue(lhs.contains(rhs))
             for rhs in self.points:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertFalse(lhs.contains(rhs))
 
     def testOverlaps(self):
         for lhs in self.intervals.nonempty:
             for rhs in self.intervals.nonempty:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertEqual(lhs.overlaps(rhs),
                                      lhs.contains(rhs.min) or lhs.contains(rhs.max)
                                      or rhs.contains(lhs.min) or rhs.contains(lhs.max))
             for rhs in self.intervals.empty:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertFalse(lhs.overlaps(rhs))
         for lhs in self.intervals.empty:
             for rhs in self.intervals.all:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertFalse(lhs.overlaps(rhs))
 
     def testEquality(self):
         for lhs in self.intervals.all:
             for rhs in self.intervals.all:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     shouldBeEqual = lhs.contains(rhs) and rhs.contains(lhs)
                     self.assertIs(lhs == rhs, shouldBeEqual)
                     self.assertIs(lhs != rhs, not shouldBeEqual)
@@ -227,7 +227,7 @@ class IntervalTests:
     def testClippedTo(self):
         for lhs in self.intervals.all:
             for rhs in self.intervals.all:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     clipped = lhs.clippedTo(rhs)
                     self.assertTrue(lhs.contains(clipped))
                     self.assertTrue(rhs.contains(clipped))
@@ -241,25 +241,25 @@ class IntervalTests:
     def testShiftedBy(self):
         for original in self.intervals.nonempty:
             for offset in self.points:
-                with self.subTest(original=original, offset=offset):
+                with self.subTest(original=repr(original), offset=repr(offset)):
                     shifted = original.shiftedBy(offset)
                     self.assertEqual(original.size, shifted.size)
                     self.assertEqual(original.min + offset, shifted.min)
                     self.assertEqual(original.max + offset, shifted.max)
         for original in self.intervals.empty:
             for offset in self.points:
-                with self.subTest(original=original, offset=offset):
+                with self.subTest(original=repr(original), offset=repr(offset)):
                     self.checkEmptyIntervalInvariants(original.shiftedBy(offset))
         for original in self.intervals.all:
             for offset in self.nonfinitePoints:
-                with self.subTest(original=original, offset=offset):
+                with self.subTest(original=repr(original), offset=repr(offset)):
                     with self.assertRaises(InvalidParameterError):
                         original.shiftedBy(offset)
 
     def testExpandedTo(self):
         for lhs in self.intervals.all:
             for rhs in self.intervals.all:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     expanded = lhs.expandedTo(rhs)
                     self.assertTrue(expanded.contains(lhs))
                     self.assertTrue(expanded.contains(rhs))
@@ -270,39 +270,39 @@ class IntervalTests:
                     self.assertIs(expanded == rhs, rhs.contains(lhs))
                     self.assertIs(expanded == lhs, lhs.contains(rhs))
             for rhs in self.points:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     self.assertEqual(lhs.expandedTo(rhs),
                                      lhs.expandedTo(self.IntervalClass(min=rhs, max=rhs)))
             for rhs in self.nonfinitePoints:
-                with self.subTest(lhs=lhs, rhs=rhs):
+                with self.subTest(lhs=repr(lhs), rhs=repr(rhs)):
                     with self.assertRaises(InvalidParameterError):
                         lhs.expandedTo(rhs)
 
     def testDilatedBy(self):
         for original in self.intervals.nonempty:
             for buffer in self.points:
-                with self.subTest(original=original, buffer=buffer):
+                with self.subTest(original=repr(original), buffer=repr(buffer)):
                     dilated = original.dilatedBy(buffer)
                     if not dilated.isEmpty():
                         self.assertEqual(original.min - buffer, dilated.min)
                         self.assertEqual(original.max + buffer, dilated.max)
         for original in self.intervals.empty:
             for buffer in self.points:
-                with self.subTest(original=original, buffer=buffer):
+                with self.subTest(original=repr(original), buffer=repr(buffer)):
                     self.checkEmptyIntervalInvariants(original.dilatedBy(buffer))
         for original in self.intervals.all:
             for buffer in self.nonfinitePoints:
-                with self.subTest(original=original, buffer=buffer):
+                with self.subTest(original=repr(original), buffer=repr(buffer)):
                     with self.assertRaises(InvalidParameterError):
                         original.dilatedBy(buffer)
 
     def testErodedBy(self):
         for original in self.intervals.all:
             for buffer in self.points:
-                with self.subTest(original=original, buffer=buffer):
+                with self.subTest(original=repr(original), buffer=repr(buffer)):
                     self.assertEqual(original.erodedBy(buffer), original.dilatedBy(-buffer))
             for buffer in self.nonfinitePoints:
-                with self.subTest(original=original, buffer=buffer):
+                with self.subTest(original=repr(original), buffer=repr(buffer)):
                     with self.assertRaises(InvalidParameterError):
                         original.erodedBy(buffer)
 
@@ -310,16 +310,16 @@ class IntervalTests:
         for original in self.intervals.nonempty:
             for point in self.points:
                 reflected = original.reflectedAbout(point)
-                with self.subTest(original=original, point=point, reflected=reflected):
+                with self.subTest(original=repr(original), point=repr(point), reflected=repr(reflected)):
                     self.assertEqual(point - original.min, -(point - reflected.max))
                     self.assertEqual(point - original.max, -(point - reflected.min))
         for original in self.intervals.empty:
             for point in self.points:
-                with self.subTest(original=original, point=point):
+                with self.subTest(original=repr(original), point=repr(point)):
                     self.checkEmptyIntervalInvariants(original.reflectedAbout(point))
         for original in self.intervals.all:
             for point in self.nonfinitePoints:
-                with self.subTest(original=original, point=point):
+                with self.subTest(original=repr(original), point=repr(point)):
                     with self.assertRaises(InvalidParameterError):
                         original.reflectedAbout(point)
 
@@ -357,11 +357,11 @@ class IntervalDTestCase(unittest.TestCase, IntervalTests):
 
     def testInfinite(self):
         for interval in self.intervals.finite:
-            with self.subTest(interval=interval):
+            with self.subTest(interval=repr(interval)):
                 self.assertTrue(interval.isFinite())
                 self.assertTrue(np.isfinite(interval.size))
         for interval in self.intervals.infinite:
-            with self.subTest(interval=interval):
+            with self.subTest(interval=repr(interval)):
                 self.assertFalse(interval.isEmpty())
                 self.assertFalse(interval.isFinite())
                 self.assertEqual(interval.size, np.inf)
@@ -406,7 +406,8 @@ class IntervalITestCase(unittest.TestCase, IntervalTests):
             (IntervalD(min=-0.1, max=1.1), IntervalI.EdgeHandlingEnum.SHRINK, IntervalI()),
         ]
         for intervalD, edgeHandling, intervalI in cases:
-            with self.subTest(intervalD=intervalD, edgeHandling=edgeHandling, intervalI=intervalI):
+            with self.subTest(intervalD=repr(intervalD), edgeHandling=repr(edgeHandling),
+                              intervalI=repr(intervalI)):
                 self.assertFalse(intervalD.isEmpty())
                 self.assertEqual(IntervalI(intervalD, edgeHandling), intervalI)
                 if intervalI.isEmpty():
