@@ -103,7 +103,7 @@ void declareCommonIntervalInterface(PyClass &cls) {
 }  // namespace
 
 void wrapInterval(cpputils::python::WrapperCollection &wrappers) {
-    wrappers.wrapType(py::class_<IntervalI, std::shared_ptr<IntervalI>>(wrappers.module, "IntervalI"),
+    wrappers.wrapType(py::classh<IntervalI>(wrappers.module, "IntervalI"),
                       [](auto &mod, auto &cls) {
                           py::enum_<IntervalI::EdgeHandlingEnum>(cls, "EdgeHandlingEnum")
                                   .value("EXPAND", IntervalI::EdgeHandlingEnum::EXPAND)
@@ -117,7 +117,7 @@ void wrapInterval(cpputils::python::WrapperCollection &wrappers) {
                           declareCommonIntervalInterface(cls);
                       });
 
-    wrappers.wrapType(py::class_<IntervalD, std::shared_ptr<IntervalD>>(wrappers.module, "IntervalD"),
+    wrappers.wrapType(py::classh<IntervalD>(wrappers.module, "IntervalD"),
                       [](auto &mod, auto &cls) {
                           cls.def(py::init<IntervalI const &>());
                           cls.def("getCenter", &IntervalD::getCenter);
