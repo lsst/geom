@@ -4,7 +4,7 @@ scripts.BasicSConscript.pybind11(
     ['_geom'],
     extraSrc={
         "_geom": ["_AffineTransform.cc", "_Angle.cc", "_Interval.cc", "_Box.cc", "_coordinates.cc",
-                  "_LinearTransform.cc", "_SpherePoint.cc"]
+                  "_LinearTransform.cc", "_SpherePoint.cc", "_SphereTransform.cc"]
     },
     addUnderscore=False
 )
